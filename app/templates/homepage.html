@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GitHub CIC Generator</title>
+  <link rel="stylesheet" href="../static/styles/style.css"/>
+  <!-- Font Awesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+  <nav>
+    <h2>GitHub Repository Scraper and Cocktail Identity Card Generator</h2>
+    <button 
+        onclick="window.location.href='{{ url_for('about') }}';"
+        style="width: 140px; height: 50px; font-size: 15px;">
+      <i class="fa-solid fa-circle-info"></i> About
+    </button>
+  </nav>
+  
+  <div class="container">
+    <form>
+
+      <label for="url"><i class="fa-brands fa-github" style="margin-right: 5px;"></i>Enter a valid public GitHub repository URL to scrape:</label>
+      <input type="text" id="url" placeholder="e.g., https://github.com/author/repository"/>
+
+      <label for="token"><i class="fa-solid fa-user " style="margin-right: 5px;"></i>Enter a valid GitHub personal access token:</label>
+      <div class="password-wrapper">
+        <input type="password" id="token" />
+        <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">
+          <i class="fa-solid fa-eye"></i>
+        </button>
+      </div>
+
+      <button type="submit" style="height: 50px; font-size: 15px; margin-bottom: -15px;">
+        <i class="fa-solid fa-magnifying-glass"></i>Begin Scraping
+      </button>
+    </form>
+
+    <!--
+    <label for="type">Select data type:</label>
+      <select id="type">
+        <option value="text">Text</option>
+        <option value="image">Image</option>
+        <option value="links">Links</option>
+      </select>
+    <div class="output-box">
+      Results will appear here...
+    </div>
+    <div class="image-preview">
+      <!-- Optional image shown after scraping -->
+      <!-- <img src="result.jpg" alt="Scraped Image"/> 
+       -->
+
+    
+    </div>
+  </div>
+
+  <footer style="margin-top: 100px; margin-left: 100px;">
+    <label >PLACEHOLDER: LOGOS NECESSARIOS E OUTRAS INFORMAÇOES</label>
+  </footer>
+
+  <script>
+  function togglePasswordVisibility() {
+    const input = document.getElementById('token');
+    const icon = document.querySelector('.toggle-password i');
+
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.classList.remove('fa-eye');
+      icon.classList.add('fa-eye-slash');
+    } else {
+      input.type = 'password';
+      icon.classList.remove('fa-eye-slash');
+      icon.classList.add('fa-eye');
+    }
+  }
+</script>
+
+</body>
+</html>
