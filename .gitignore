@@ -16,3 +16,6 @@ cocktail_scraper/external
 cocktail_scraper/generated_ontologies
 cocktail_scraper/graph_gen/__pycache__
 cocktail_scraper/ontology_data.json
+app/.env
+app/*.env
+genkey.py

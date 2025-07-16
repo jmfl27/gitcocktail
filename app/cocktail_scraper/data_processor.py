@@ -1,7 +1,7 @@
 import json
 import re
 import pprint
-import dependencies_parser
+from . import dependencies_parser
 
 # Auxiliary function to help rebuid file hierarchy
 def build_hierarchy(entries):
@@ -78,7 +78,7 @@ def load_repos(file_path,is_file):
         with open(file_path) as f:
             data = json.load(f)
     else:
-        data = file_path
+        data = [file_path]
 
     for repo in data:
         print(repo["name"])
