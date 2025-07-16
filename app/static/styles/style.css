@@ -166,3 +166,94 @@ nav a:hover {
 .toggle-password:hover {
   color: #000;
 }
+
+/* Add this to your existing CSS */
+.text-boxes-container {
+  display: flex;
+  gap: 20px; /* Space between boxes */
+  margin-bottom: 20px;
+}
+
+.text-box {
+  flex: 1;
+  min-width: 0;
+  /* Add margin below the label */
+  display: flex;
+  flex-direction: column;
+  gap: 0px; /* This creates space between label and text box */
+}
+
+
+.scrollable-text-box {
+  height: 600px; /* Fixed height for scrollability */
+  overflow-y: auto; /* Vertical scrollbar when needed */
+  padding: 0px;
+  background-color: #eef3f8;
+  border-radius: 0 0 6px 6px;
+  border: 1px solid #ccd6e0;
+  font-family: Consolas, monospace;
+  white-space: pre-wrap;
+}
+
+/* Responsive adjustment */
+@media (max-width: 600px) {
+  .text-boxes-container {
+    flex-direction: column;
+  }
+}
+
+/* Toggleable Image Container */
+.toggle-image-container {
+  margin: 20px 0;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.toggle-header {
+  padding: 12px 15px;
+  font-size: large;
+  background-color: #017acd;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.3s ease;
+}
+
+.toggle-header:hover {
+  background-color: #015fa3;
+}
+
+.toggle-header::after {
+  content: "+";
+  font-size: 1.2em;
+}
+
+.toggle-header.active::after {
+  content: "-";
+}
+
+.toggle-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  background-color: white;
+}
+
+.toggle-content img {
+  width: 100%;
+  padding: 15px;
+  display: block;
+}
+
+.result-label {
+  color: #ffffff;
+  font-size: large;
+  background-color: #017acd;
+  padding: 12px 15px;
+  border-radius: 6px 6px 0 0;
+  overflow: hidden;
+}

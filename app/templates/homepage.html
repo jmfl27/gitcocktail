@@ -19,39 +19,23 @@
   </nav>
   
   <div class="container">
-    <form>
+    <form method="POST" action="/generate">
 
       <label for="url"><i class="fa-brands fa-github" style="margin-right: 5px;"></i>Enter a valid public GitHub repository URL to scrape:</label>
-      <input type="text" id="url" placeholder="e.g., https://github.com/author/repository"/>
+      <input type="text" id="url" name="repo_url" placeholder="e.g., https://github.com/author/repository"/>
 
       <label for="token"><i class="fa-solid fa-user " style="margin-right: 5px;"></i>Enter a valid GitHub personal access token:</label>
       <div class="password-wrapper">
-        <input type="password" id="token" />
+        <input type="password" id="token" name="github_token"/>
         <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">
           <i class="fa-solid fa-eye"></i>
         </button>
       </div>
 
       <button type="submit" style="height: 50px; font-size: 15px; margin-bottom: -15px;">
-        <i class="fa-solid fa-magnifying-glass"></i>Begin Scraping
+        <i class="fa-solid fa-magnifying-glass"></i>Generate Cocktail Identity Card
       </button>
     </form>
-
-    <!--
-    <label for="type">Select data type:</label>
-      <select id="type">
-        <option value="text">Text</option>
-        <option value="image">Image</option>
-        <option value="links">Links</option>
-      </select>
-    <div class="output-box">
-      Results will appear here...
-    </div>
-    <div class="image-preview">
-      <!-- Optional image shown after scraping -->
-      <!-- <img src="result.jpg" alt="Scraped Image"/> 
-       -->
-
     
     </div>
   </div>
