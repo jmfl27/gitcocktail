@@ -19,3 +19,5 @@ cocktail_scraper/ontology_data.json
 app/.env
 app/*.env
 genkey.py
+app/cocktail_scraper/__pycache__/translator.cpython-311.pyc
+app/cocktail_scraper/graph_gen/__pycache__/odlc.cpython-311.pyc

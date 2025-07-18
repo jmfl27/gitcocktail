@@ -58,6 +58,7 @@ def dependency_tuples(list,already_used,app_name,cocktail_name):
                         for lang in ingredient["associated_languages"]:
                             ontology += big_tab + ingredient["name"] + " = supports => " + lang + ";\n"
                 
+                # "Ingredient" is used in "Task(s)"
                 if "associated_tasks" in ingredient:
                     for task in ingredient["associated_tasks"]:
                         ontology += big_tab + ingredient["name"] + " = is_used_for => " + task + ";\n"
@@ -66,8 +67,8 @@ def dependency_tuples(list,already_used,app_name,cocktail_name):
 
     return (ontology,already_used)
             
-# Uses the repository data to build the Cocktail Ontology
-def translate_data(repo_data):
+# Uses the repository data to build the Cocktail Ontology or a Cocktail Identity Card (CIC)
+def translate_data(repo_data,is_cic):
     already_used = set()
 
     # Set names of entities to be used many times in the ontology
@@ -75,20 +76,27 @@ def translate_data(repo_data):
     dev_name = repo_data["name"] + "Development"
     cocktail_name = repo_data["name"] + "Cocktail"
 
-    ontology = """  Ontology OntoCoq
+    ontology = """
+    Ontology OntoCoq
 
         concepts {
+    """
+    
+    # Trim down the ontology for the CIC: no Sys, Ing, Ckt or Dev concepts (individuals take their place)
+    if not is_cic:
+                ontology += """
                 System,
-                Resource,
-                Development,
-                Task,
-                Cocktail,
                 Ingredient,
+                Cocktail,
+                Development,
+"""
+    ontology += """
+                Resource,
+                Task,
                 Language,
                 Library,
                 Framework,
                 Tool
-
     """
     # Tasks
         # if tasks ontology += ",/n% Tasks:"
@@ -149,7 +157,12 @@ def translate_data(repo_data):
         }
 
         triples {
-                % Conceptual plan:
+    """
+
+    # Complete ontology
+    if not is_cic:
+        ontology += """
+                % Conceptual plan: 
                 System = requires => Development;
                 Resource = supports => System;
                 Development = uses => Cocktail;
@@ -166,11 +179,20 @@ def translate_data(repo_data):
                 Framework = encloses => Language;
                 Tool = supports => Language;  
 """
+    # Trim down the ontology for the CIC: no tuples with the Sys, Ing, Ckt or Dev concepts (individuals take their place)
+    #                                     as well as no "extends", "supports" and "encloses" tuples
+    else:
+        ontology += small_tab + "    " + "% Conceptual plan:\n" + big_tab + "Resource = supports => " + app_name + ";\n"
+        ontology += big_tab + "Task = pof => " + dev_name + ";\n\n"
+    
     # Triples
     # System triples
-    ontology += big_tab + app_name + " = iof => System;\n"
-    ontology += big_tab + dev_name + " = iof => Development;\n"
-    ontology += big_tab + cocktail_name + " = iof => Cocktail;\n"
+
+    # Complete ontology
+    if not is_cic:
+        ontology += big_tab + app_name + " = iof => System;\n"
+        ontology += big_tab + dev_name + " = iof => Development;\n"
+        ontology += big_tab + cocktail_name + " = iof => Cocktail;\n"
 
     ontology += big_tab + app_name + " = requires => " + dev_name + ";\n"
     ontology += big_tab + dev_name + " = uses => " + cocktail_name + ";\n"
@@ -226,11 +248,12 @@ def translate_data(repo_data):
 
 # Generates a repository's ontology and Cocktail Identity Card
 def generate_cic(repo_data):
-    ontology = translate_data(repo_data)
+    ontology = translate_data(repo_data,False)
+    cic = translate_data(repo_data,True)
     result = {
         "name": repo_data["name"],
         "ontology": ontology,
-        "cic": "TBD",
+        "cic": cic,
         "graph": "TBD"
     }
 
@@ -244,15 +267,27 @@ def test_ontology():
         data = json.load(f)
         for repo in data:
             print(repo["name"])
-            ontology = translate_data(repo)
-            ontology_data.append({"name":repo["name"],"ontology":ontology})
-            filename = "generated_ontologies/" + repo["name"] + "_ontology.txt"
+            ontology = translate_data(repo,False)
+            cic = translate_data(repo,True)
+            ontology_data.append({"name":repo["name"],"ontology":ontology,"cic":cic})
+
+            # Save ontology
+            onto_filename = "generated_ontologies/" + repo["name"] + "_ontology.txt"
 
             # Write the data to the file
-            with open(filename, 'w', encoding='utf-8') as file:
+            with open(onto_filename, 'w', encoding='utf-8') as file:
                 file.write(ontology)
             
-            generate_graph(repo["name"],ontology,True)
+            generate_graph(repo["name"],ontology,False,True)
+
+            # Save CIC
+            cic_filename = "generated_ontologies/" + repo["name"] + "_cic.txt"
+
+            # Write the data to the file
+            with open(cic_filename, 'w', encoding='utf-8') as file:
+                file.write(cic)
+            
+            generate_graph(repo["name"],cic,True,True)
             
 
     # File handling
