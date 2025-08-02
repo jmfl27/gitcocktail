@@ -18,57 +18,78 @@
     </button>
   </nav>
   
-    <h2><i class="fa-solid fa-martini-glass-citrus" style="margin-right: 10px;"></i>{{data.cocktail.name}}</h3>
+  <h2><i class="fa-solid fa-martini-glass-citrus" style="margin-right: 10px;"></i>{{data.cocktail.name}}</h2>
   
-    <div class="text-boxes-container" style="margin-top: 10px;">
-        <div class="text-box">
-            <label class="result-label">Cocktail Identity Card</label>
-            <div class="scrollable-text-box output-box">
-            {{data.cocktail.cic}}
-            </div>
+  <div class="content-container" style="margin-top: 10px;">
+    <div class="tabbed-text-box">
+      <div class="tab-buttons">
+        <button class="tab-button active" onclick="switchTab('cic')"><i class="fa-solid fa-id-card"></i>Cocktail Identity Card</button>
+        <button class="tab-button" onclick="switchTab('ontology')"><i class="fa-solid fa-scroll"></i>Complete Ontology</button>
+      </div>
+      <div class="tab-content active" id="cic-content">
+        <div class="scrollable-text-box output-box">
+          {{data.cocktail.cic}}
         </div>
-        
-        <div class="text-box">
-            <label class="result-label">Complete Ontology</label>
-            <div class="scrollable-text-box output-box">
-            {{data.cocktail.ontology}}
-            </div>
+      </div>
+      <div class="tab-content" id="ontology-content">
+        <div class="scrollable-text-box output-box">
+          {{data.cocktail.ontology}}
         </div>
+      </div>
     </div>
-
-    <div class="toggle-image-container">
-        <div class="toggle-header">
-            <span>Click to Show Graph</span>
-        </div>
-        <div class="toggle-content">
-            <img src="your-image.jpg" alt="Toggleable Image">
-        </div>
+    
+    <div class="toggle-image-container" style="margin-top: 0px;">
+      <div class="toggle-header">
+        <span>Click to Show Graph</span>
+      </div>
+      <div class="toggle-content">
+        <img src="your-image.jpg" alt="Toggleable Image">
+      </div>
     </div>
+  </div>
 
-    <footer style="margin-top: 100px; margin-left: 100px;">
-        <label >PLACEHOLDER: LOGOS NECESSARIOS E OUTRAS INFORMAÇOES</label>
-    </footer>
+  <footer style="margin-top: 100px; margin-left: 100px;">
+    <label>PLACEHOLDER: LOGOS NECESSARIOS E OUTRAS INFORMAÇOES</label>
+  </footer>
 
-    <script>
+  <script>
+    // Tab switching functionality
+    function switchTab(tabName) {
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      
+      // Remove active class from all buttons
+      document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+      });
+      
+      // Show selected tab content
+      document.getElementById(`${tabName}-content`).classList.add('active');
+      
+      // Set clicked button as active
+      event.currentTarget.classList.add('active');
+    }
+
+    // Toggle image container functionality
     document.querySelectorAll('.toggle-header').forEach(header => {
-        header.addEventListener('click', () => {
-            header.classList.toggle('active');
+      header.addEventListener('click', () => {
+        header.classList.toggle('active');
+        const content = header.nextElementSibling;
+        const span = header.querySelector('span');
 
-            const content = header.nextElementSibling;
-            const span = header.querySelector('span');
+        // Toggle content visibility
+        content.style.maxHeight = content.style.maxHeight ? null : content.scrollHeight + 'px';
 
-            // Toggle content visibility
-            content.style.maxHeight = content.style.maxHeight ? null : content.scrollHeight + 'px';
-
-            // Toggle span text
-            if (span.textContent === 'Click to Show Graph') {
-                span.textContent = 'Click to Hide Graph';
-            } else {
-                span.textContent = 'Click to Show Graph';
-            }
-        });
+        // Toggle span text
+        if (span.textContent === 'Click to Show Graph') {
+          span.textContent = 'Click to Hide Graph';
+        } else {
+          span.textContent = 'Click to Show Graph';
+        }
+      });
     });
-</script>
-
+  </script>
 </body>
 </html>

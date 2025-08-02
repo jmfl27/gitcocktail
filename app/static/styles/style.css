@@ -257,3 +257,91 @@ nav a:hover {
   border-radius: 6px 6px 0 0;
   overflow: hidden;
 }
+
+/* New styles for tabbed interface and layout */
+.content-container {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+}
+
+.tabbed-text-box {
+  flex: 2.6;
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-buttons {
+  display: flex;
+  border-radius: 6px 6px 0 0;
+  overflow: hidden;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 12px 15px;
+  background-color: #017bcda4;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: large;
+  color: #ffffff;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  border-radius: 0 0 0 0;
+}
+
+.tab-button:hover {
+  background-color: #017bcd;
+}
+
+.tab-button.active {
+  background-color: #017acd;
+  color: white;
+  border-bottom: 3px solid #015fa3;
+}
+
+.tab-content {
+  display: none;
+  height: 600px;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.toggle-image-container {
+  flex: 2;
+  height: fit-content;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .content-container {
+    flex-direction: column;
+  }
+  
+  .toggle-image-container {
+    margin-top: 20px;
+  }
+}
+
+.popup {
+  position: fixed;
+  top: 15%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  background: #ffefef;
+  border: 1px solid #f00;
+  color: #900;
+  padding: 20px;
+  z-index: 9999;
+  border-radius: 8px;
+  min-width: 250px;
+  box-shadow: 2px 4px 8px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.popup button {
+  margin-top: 15px;
+}
