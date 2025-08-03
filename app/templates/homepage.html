@@ -17,16 +17,28 @@
       <i class="fa-solid fa-circle-info"></i> About
     </button>
   </nav>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div id="popup" class="popup">
+      <h3><i class="fa-solid fa-triangle-exclamation"></i> GitHub Repository Fetching Error</h2>
+        {% for category, message in messages %}
+          <span>{{ message }}</span>
+        {% endfor %}
+        <button onclick="closePopup()">Close</button>
+    </div>
+    {% endif %}
+  {% endwith %}
   
   <div class="container">
     <form method="POST" action="/generate">
 
-      <label for="url"><i class="fa-brands fa-github" style="margin-right: 5px;"></i>Enter a valid public GitHub repository URL to scrape:</label>
+      <label for="url"><i class="fa-brands fa-github" style="margin-right: 5px;"></i>Enter a valid GitHub repository URL to scrape (public or one you have access to):</label>
       <input type="text" id="url" name="repo_url" placeholder="e.g., https://github.com/author/repository"/>
 
       <label for="token"><i class="fa-solid fa-user " style="margin-right: 5px;"></i>Enter a valid GitHub personal access token:</label>
       <div class="password-wrapper">
-        <input type="password" id="token" name="github_token"/>
+        <input type="password" autocomplete="current-password" id="token" name="github_token"/>
         <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">
           <i class="fa-solid fa-eye"></i>
         </button>
@@ -58,6 +70,10 @@
       icon.classList.remove('fa-eye-slash');
       icon.classList.add('fa-eye');
     }
+  }
+
+  function closePopup() {
+      document.getElementById('popup').style.display = 'none';
   }
 </script>
 

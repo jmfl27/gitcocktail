@@ -21,3 +21,5 @@ app/*.env
 genkey.py
 app/cocktail_scraper/__pycache__/translator.cpython-311.pyc
 app/cocktail_scraper/graph_gen/__pycache__/odlc.cpython-311.pyc
+app/cocktail_scraper/__pycache__/data_processor.cpython-311.pyc
+app/cocktail_scraper/__pycache__/scraper.cpython-311.pyc

@@ -342,6 +342,15 @@ nav a:hover {
   text-align: center;
 }
 
+.popup span {
+  white-space: pre-line;
+}
+
+
 .popup button {
   margin-top: 15px;
+  display: block;
+  width: 100px;
+  margin-left: auto;
+  margin-right: auto;
 }

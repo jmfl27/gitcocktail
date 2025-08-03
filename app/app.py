@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, redirect, session, url_for, abort
+from flask import Flask, render_template, flash, jsonify, request, redirect, session, url_for, abort
 import requests
 import os
 import secrets
@@ -47,17 +47,37 @@ def generate():
     
     # Validate inputs
     if not repo_url or not github_token:
-        return "Missing required fields", 400
+        flash('Missing one or more required fields, please insert them.', 'error')
+        return redirect(url_for('homepage'))  # Redirect to homepage
     
     # Process data
     try:
         results = generate_repo_cic(repo_url, github_token)
-        # Generate unique ID and store results
-        result_id = secrets.token_hex(8)
-        cache.set(result_id, results)
-        
-        # Redirect with ID instead of full data
-        return redirect(url_for('results', result_id=result_id))
+
+        # GitHub API returned an error
+        if type(results) == tuple:
+            print('AN API ERROR WAS FOUND: ' + str(results))
+            # Show user what error ocurred:
+            if results[1] == 404:
+                flash('The repository that you requested is either not available or you do not have '
+                'the required permissions to access it.\nPlease make sure that your personal access token ' \
+                'is correctly set up and/or that the repository is public and available.', 'error')
+                return redirect(url_for('homepage'))  # Redirect to homepage
+            elif results[1] == 403 or results[1] == 401:
+                flash('Your personal access token may have been incorrectly set up, expired or you may have typed it incorrectly.\n' \
+                'Please make sure that your personal access token:\n -  is correctly set up;\n - is still valid;\n'
+                '- was correctly typed in.', 'error')
+                return redirect(url_for('homepage'))
+            elif results[1] == 901:
+                flash('It seems that multiple repositories were fetched at once, intstead of only one.\n' \
+                'Please try again later.')
+        else:
+            # Generate unique ID and store results
+            result_id = secrets.token_hex(8)
+            cache.set(result_id, results)
+            
+            # Redirect with ID instead of full data
+            return redirect(url_for('results', result_id=result_id))
     
     except Exception as e:
         print(f"Error generating results: {str(e)}")
@@ -82,27 +102,36 @@ def results():
 
 def generate_repo_cic(repo_url, github_token):
     repo_data = scrap_data(repo_url,github_token)
-    print("SCRAPER:\n")
-    print(repo_data)
-
-    processed_data = process_data(repo_data)
-    print("PROCESSOR:\n")
-    print(processed_data)
-
-    if len(processed_data) == 1:
-        cic = generate_cic(processed_data[0])
-        print("TRANSLATOR:\n")
-        print(cic)
+    
+    # GitHub API Error
+    if type(repo_data) == tuple:
+        print('GitHub API Error: ' + str(repo_data))
+        return repo_data
     else:
-        print("Error: Fetched multiple repos somehow")
+        # GitHub API fetching success; proceed with CIC generation
+        print("SCRAPER:\n")
+        print(repo_data)
 
-    results = {
-        "scraper_data" : repo_data,
-        "processor_data" : processed_data,
-        "cic_data" : cic 
-    }
+        processed_data = process_data(repo_data)
+        print("PROCESSOR:\n")
+        print(processed_data)
 
-    return results
+        if len(processed_data) == 1:
+            cic = generate_cic(processed_data[0])
+            print("TRANSLATOR:\n")
+            print(cic)
+        else:
+            # Multiple repos error treatement (just to be safe)
+            print("Error: Fetched multiple repos somehow")
+            return (('Error',901))
+
+        results = {
+            "scraper_data" : repo_data,
+            "processor_data" : processed_data,
+            "cic_data" : cic 
+        }
+
+        return results
 
 if __name__ == '__main__':
     app.run(port=8000, debug=True)

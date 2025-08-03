@@ -29,7 +29,7 @@ def get_repo_data(repo_url, token=None):
         return repo_data
     else:
         print(f"Error: Unable to fetch repository details (Status code {response.status_code}: {response.text})")
-        return None
+        return response.status_code
 
 # Fetches the contents of the specified file from the specified repo through the GitHub API
 def get_file_content(repo_url, path, token=None):
@@ -513,15 +513,16 @@ def save_file(repo_data):
 # Scrap data from the repository
 def scrap_data(repo_url,token,debug=None):
     repo_data = get_repo_data(repo_url,token)
-    readme_data = get_repo_readme(repo_url,token)
-    lang_data = get_repo_languages(repo_url,token)
-    file_path_data = get_repo_files(repo_url,repo_data.get('default_branch'),token)
-    submodule_data = get_submodules(repo_url,token)
-    #dependency_files_data = get_dependencies(repo_url, token, list(lang_data.keys()))
 
-    if repo_data:
+    # If repo exists, is available and data was able to be fetched
+    if repo_data and type(repo_data) == dict:
         repo_name = repo_data.get('name')
         print(f"The repository name is: {repo_name}")
+        readme_data = get_repo_readme(repo_url,token)
+        lang_data = get_repo_languages(repo_url,token)
+        file_path_data = get_repo_files(repo_url,repo_data.get('default_branch'),token)
+        submodule_data = get_submodules(repo_url,token)
+        #dependency_files_data = get_dependencies(repo_url, token, list(lang_data.keys()))
         if lang_data:
             #print(f"Languages used:\n{lang_data}")
             repo_data["languages"] = lang_data
@@ -552,6 +553,8 @@ def scrap_data(repo_url,token,debug=None):
         
         #pprint.pprint(repo_data)
         return repo_data
+    else:
+        return ('Error',repo_data)
 
 # Test/Utilize the scrapper localy
 def test_scraper():
