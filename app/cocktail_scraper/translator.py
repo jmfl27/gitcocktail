@@ -70,6 +70,8 @@ def dependency_tuples(list,already_used,app_name,cocktail_name):
 # Uses the repository data to build the Cocktail Ontology or a Cocktail Identity Card (CIC)
 def translate_data(repo_data,is_cic):
     already_used = set()
+    ingredient_types = repo_data["ingredient_types"]
+    print(ingredient_types)
 
     # Set names of entities to be used many times in the ontology
     app_name = repo_data["name"]
@@ -93,11 +95,18 @@ def translate_data(repo_data,is_cic):
     ontology += """
                 Resource,
                 Task,
-                Language,
+                Language"""
+    if not is_cic:
+        ontology += """,
                 Library,
                 Framework,
                 Tool
     """
+    # Trim down the ontology for the CIC: only instantiate all ingedient type concepts that are present in tuples
+    else:
+        for type in ingredient_types:
+            ontology += ",\n" + big_tab + type
+    
     # Tasks
         # if tasks ontology += ",/n% Tasks:"
     ontology += """
@@ -252,6 +261,7 @@ def generate_cic(repo_data):
     cic = translate_data(repo_data,True)
     result = {
         "name": repo_data["name"],
+        "ingredient_count": repo_data["ingredient_count"],
         "ontology": ontology,
         "cic": cic,
         "graph": "TBD"
@@ -297,4 +307,4 @@ def test_ontology():
     with open(filename, 'w') as f:
         json.dump(ontology_data, f, indent=4)  
 
-#test_ontology()
+test_ontology()

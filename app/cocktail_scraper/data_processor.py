@@ -70,6 +70,23 @@ def convert_to_output_format(hierarchy):
     
     return output
 
+# Fetches all of the distinct ingredient types and counts the number of ingredients present
+def get_types(obj, types=None, count=None):
+    if types is None:
+        types = set()
+    if count is None:
+        count = [0]  # Single-element list as mutable counter
+    if isinstance(obj, dict):
+        if "type" in obj:
+            types.add(obj["type"])
+            count[0] += 1
+        for v in obj.values():
+            get_types(v, types, count)
+    elif isinstance(obj, list):
+        for item in obj:
+            get_types(item, types, count)
+    return types, count[0]
+
 # Loads the repo data from a file or from a dictionary
 def load_repos(file_path,is_file):
     repo_data = []
@@ -78,7 +95,7 @@ def load_repos(file_path,is_file):
         with open(file_path) as f:
             data = json.load(f)
     else:
-        data = [file_path]
+        data = file_path
 
     for repo in data:
         print(repo["name"])
@@ -141,7 +158,6 @@ def eliminate_duplicates(obj):
 
 # Recursively eliminates duplicate dictionaries from all lists in a nested dict structure
 def eliminate_duplicates(obj):
-
     if isinstance(obj, dict):
         # Recursively process each value in the dict
         return {k: eliminate_duplicates(v) for k, v in obj.items()}
@@ -294,10 +310,15 @@ def process_repo_data(repo_data):
         
         if "submodules" in repo:
             content["submodules"] = repo["submodules"]
+
+        ingredient_types, ingredient_count = get_types(content["ingredients"])
+        content["ingredient_types"] = list(ingredient_types)
+        content["ingredient_count"] = ingredient_count
         
         processed_data.append(content)
 
     return processed_data
+
 
 # Saves the processed data into a JSON file (for debug)
 def save_processed_data(repo_data):
@@ -312,6 +333,7 @@ def save_processed_data(repo_data):
 def process_data(data):
     repo_data = load_repos(data,False)
     processed_data = process_repo_data(repo_data)
+
     return processed_data
 
 # Same as above function, but saves the content into a file (for debug)
@@ -323,6 +345,7 @@ def test_process_data():
     #print("\n\n\n\n\n\n\n\n\n\n")
     #pprint.pprint(processed_data)
     save_processed_data(processed_data)
+
     return processed_data
 
-#test_process_data()
+test_process_data()
