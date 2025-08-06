@@ -189,7 +189,7 @@ nav a:hover {
   overflow-y: auto; /* Vertical scrollbar when needed */
   padding: 0px;
   background-color: #eef3f8;
-  border-radius: 0 0 6px 6px;
+  border-radius: 0 0 0 0;
   border: 1px solid #ccd6e0;
   font-family: Consolas, monospace;
   white-space: pre-wrap;

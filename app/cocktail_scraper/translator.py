@@ -307,4 +307,4 @@ def test_ontology():
     with open(filename, 'w') as f:
         json.dump(ontology_data, f, indent=4)  
 
-test_ontology()
+#test_ontology()

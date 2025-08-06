@@ -21,7 +21,7 @@
   <h2><i class="fa-solid fa-martini-glass-citrus" style="margin-right: 10px;"></i>{{data.cocktail.name}}</h2>
   
   <div class="content-container" style="margin-top: 10px;">
-    <div class="tabbed-text-box">
+    <div class="tabbed-text-box" data-cocktail-name="{{ data.cocktail.name }}">
       <div class="tab-buttons">
         <button class="tab-button active" onclick="switchTab('cic')"><i class="fa-solid fa-id-card"></i>Cocktail Identity Card</button>
         <button class="tab-button" onclick="switchTab('ontology')"><i class="fa-solid fa-scroll"></i>Complete Ontology</button>
@@ -36,7 +36,9 @@
           {{data.cocktail.ontology}}
         </div>
       </div>
+    <button id="download-btn" style="border-radius: 0 0 6px 6px; font-size: medium; height: 50px ;" ><i class="fa-solid fa-download"></i>Download</button>
     </div>
+    
     
     <div class="toggle-image-container" style="margin-top: 0px;">
       <div class="toggle-header">
@@ -90,6 +92,41 @@
         }
       });
     });
+
+  document.getElementById('download-btn').addEventListener('click', function() {
+    // Get the cocktail name from data attribute
+    const tabbedBox = document.querySelector('.tabbed-text-box');
+    let cocktailName = tabbedBox.dataset.cocktailName || "cocktail";
+    // Sanitize filename: remove special chars (optional)
+    cocktailName = cocktailName.replace(/[^\w\d-_]+/g, "_");
+
+    // Determine which tab is active ("cic" or "ontology")
+    const activeTab = document.querySelector('.tab-button.active');
+    let fileType = "cic";
+    if (activeTab && activeTab.textContent.toLowerCase().includes('ontology')) {
+      fileType = "ontology";
+    }
+    const fileName = `${cocktailName}_${fileType}.txt`;
+
+    // Get content of currently active tab's text box
+    const activeContent = document.querySelector('.tab-content.active .output-box');
+    let text = "";
+    if (activeContent) {
+      text = activeContent.textContent || activeContent.innerText || "";
+    }
+    
+    // Trigger download
+    const blob = new Blob([text], {type: "text/plain"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() {
+      URL.revokeObjectURL(a.href);
+      a.remove();
+    }, 0);
+  });
   </script>
 </body>
 </html>

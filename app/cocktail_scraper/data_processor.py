@@ -98,7 +98,6 @@ def load_repos(file_path,is_file):
         data = file_path
 
     for repo in data:
-        print(repo["name"])
         content = {}
         content["name"] = repo["name"]
         content["description"] = repo["description"]
@@ -348,4 +347,4 @@ def test_process_data():
 
     return processed_data
 
-test_process_data()
+#test_process_data()

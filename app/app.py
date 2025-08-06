@@ -112,7 +112,7 @@ def generate_repo_cic(repo_url, github_token):
         print("SCRAPER:\n")
         print(repo_data)
 
-        processed_data = process_data(repo_data)
+        processed_data = process_data([repo_data])
         print("PROCESSOR:\n")
         print(processed_data)
 
