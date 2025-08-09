@@ -65,8 +65,8 @@ class DotTranslator(Transformer):
         return result
 
 # Generates the corresponding ontology's graph
-def generate_graph(name,ontology,is_cic,debug=None):
-    with open('graph_gen/ontodl.lark') as grammar_file:
+def generate_graph(name,ontology,is_cic,to_site,debug=None):
+    with open('cocktail_scraper/graph_gen/ontodl.lark') as grammar_file:
         parser = Lark(grammar_file.read())
         #with open(sys.argv[1]) as source_file:
         tree = parser.parse(ontology)
@@ -74,7 +74,9 @@ def generate_graph(name,ontology,is_cic,debug=None):
         translator.transform(tree)
         dot_source = graphviz.Source(translator.dot())
         if is_cic:
-            if debug:
+            if to_site:
+                return dot_source
+            elif debug:
                 dot_source.render('generated_ontologies/' + name + '_cic')
             else:
                 dot_source.render(name + '_cic', cleanup=True)

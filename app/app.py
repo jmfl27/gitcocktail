@@ -4,10 +4,11 @@ import os
 import secrets
 from dotenv import load_dotenv
 from datetime import datetime
+import base64
 import cocktail_scraper.dependencies_parser
 from cocktail_scraper.scraper import scrap_data
 from cocktail_scraper.data_processor import process_data
-from cocktail_scraper.translator import generate_cic
+from cocktail_scraper.translator import generate_cic, generate_graph_dot
 from pprint import pprint
 from flask_caching import Cache
 
@@ -94,7 +95,7 @@ def results():
     
     try:
         return render_template('results.html', 
-                           data={"cocktail": results["cic_data"]})
+                           data={"cocktail": results["cic_data"]}, result_id=result_id)
         
     except Exception as e:
         print(f"Error loading results: {str(e)}")
@@ -132,6 +133,25 @@ def generate_repo_cic(repo_url, github_token):
         }
 
         return results
+
+@app.route('/graph_data')
+def graph_data():
+    # Get the cache ID of the requested CIC data
+    result_id = request.args.get('result_id')
+    if not result_id:
+        return jsonify({"error": "No result_id provided"}), 400
+
+    # Get the CIC data from the cache
+    results = cache.get(result_id)
+    if not results:
+        return jsonify({"error": "No results found"}), 404
+    cic_data = results["cic_data"]
+
+    # Generate the GraphViz graph of the CIC
+    dot = generate_graph_dot(cic_data["name"],cic_data["cic"])
+
+    # .source gets the DOT string for the browser to genarate the graph
+    return jsonify({'dot': dot.source})
 
 if __name__ == '__main__':
     app.run(port=8000, debug=True)

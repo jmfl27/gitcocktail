@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="../static/styles/style.css"/>
   <!-- Font Awesome CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdn.jsdelivr.net/npm/viz.js@2.1.2/viz.js" type="application/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/viz.js@2.1.2/full.render.js" type="application/javascript"></script>
 </head>
 <body>
   <nav>
@@ -19,7 +21,7 @@
   </nav>
   
   <h2><i class="fa-solid fa-martini-glass-citrus" style="margin-right: 10px;"></i>{{data.cocktail.name}}</h2>
-  
+  <h3>Found {{data.cocktail.ingredient_count}} ingredients</h3>
   <div class="content-container" style="margin-top: 10px;">
     <div class="tabbed-text-box" data-cocktail-name="{{ data.cocktail.name }}">
       <div class="tab-buttons">
@@ -40,14 +42,32 @@
     </div>
     
     
-    <div class="toggle-image-container" style="margin-top: 0px;">
+    <div class="stacked-container" style="flex: 2">
+      <button class="generate" id="generate_graph"><i class="fa-solid fa-gears"></i>Generate CIC Graph</button>
+      <p><i class="fa-solid fa-triangle-exclamation"></i>  <strong>Please take into account that the graph generation may take some time.
+The higher the number of ingredients found, the longer it will take. In extreme cases, it may even not generate
+at all so please be aware of these limitations when using this feature. After clicking the button to generate, please wait for the graph to finish loading.</strong></p>
+      <p id="ingredient-warning" style="color: red; display: none"><strong>Due to the large ammount of ingredients found, your graph is likely
+to take some time to generate and/or be hard to read.</strong></p>
+    </div>
+
+    <script>
+      const ingredientCount = {{data.cocktail.ingredient_count | int}}; 
+      const warning = document.getElementById('ingredient-warning');
+      if (ingredientCount >= 500) {
+        warning.style.display = 'block';
+      }
+    </script>
+    
+    <div class="toggle-image-container" style="margin-top: 0px; display:none">
       <div class="toggle-header">
-        <span>Click to Show Graph</span>
+        <span>Click to Show CIC Graph</span>
       </div>
-      <div class="toggle-content">
-        <img src="your-image.jpg" alt="Toggleable Image">
+      <div class="toggle-content" id="graph-svg-container">
+        <!-- GRAPH SVG WILL GO HERE -->
       </div>
     </div>
+
   </div>
 
   <footer style="margin-top: 100px; margin-left: 100px;">
@@ -82,51 +102,78 @@
         const span = header.querySelector('span');
 
         // Toggle content visibility
-        content.style.maxHeight = content.style.maxHeight ? null : content.scrollHeight + 'px';
+        content.style.maxHeight = content.style.maxHeight ? null :(content.scrollHeight + 20) + 'px';
+        content.style.overflow = 'auto'
 
         // Toggle span text
-        if (span.textContent === 'Click to Show Graph') {
-          span.textContent = 'Click to Hide Graph';
+        if (span.textContent === 'Click to Show CIC Graph') {
+          span.textContent = 'Click to Hide CIC Graph';
         } else {
-          span.textContent = 'Click to Show Graph';
+          span.textContent = 'Click to Show CIC Graph';
         }
       });
     });
+  
+    // Generate the CIC graph and show it to the user
+    document.getElementById('generate_graph').addEventListener('click', function() {
+      // Hide stacked-container with button + warnings
+      document.querySelector('.stacked-container').style.display = 'none';
 
-  document.getElementById('download-btn').addEventListener('click', function() {
-    // Get the cocktail name from data attribute
-    const tabbedBox = document.querySelector('.tabbed-text-box');
-    let cocktailName = tabbedBox.dataset.cocktailName || "cocktail";
-    // Sanitize filename: remove special chars (optional)
-    cocktailName = cocktailName.replace(/[^\w\d-_]+/g, "_");
+      // Show the toggle-image-container
+      document.querySelector('.toggle-image-container').style.display = '';
 
-    // Determine which tab is active ("cic" or "ontology")
-    const activeTab = document.querySelector('.tab-button.active');
-    let fileType = "cic";
-    if (activeTab && activeTab.textContent.toLowerCase().includes('ontology')) {
-      fileType = "ontology";
-    }
-    const fileName = `${cocktailName}_${fileType}.txt`;
+      // Fetch DOT source from backend
+      fetch('/graph_data?result_id={{ result_id }}')
+        .then(resp => resp.json())
+        .then(data => {
+          const viz = new Viz();
+          viz.renderSVGElement(data.dot)
+            .then(function(svgElem) {
+              // Place SVG in toggle-content
+              const graphContainer = document.getElementById('graph-svg-container');
+              graphContainer.innerHTML = ""; // Clear previous content
+              graphContainer.appendChild(svgElem);
+            })
+            .catch(err => {
+              document.getElementById('graph-svg-container').innerText = "Error generating graph.";
+            });
+        });
+    });
 
-    // Get content of currently active tab's text box
-    const activeContent = document.querySelector('.tab-content.active .output-box');
-    let text = "";
-    if (activeContent) {
-      text = activeContent.textContent || activeContent.innerText || "";
-    }
-    
-    // Trigger download
-    const blob = new Blob([text], {type: "text/plain"});
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(function() {
-      URL.revokeObjectURL(a.href);
-      a.remove();
-    }, 0);
-  });
+    document.getElementById('download-btn').addEventListener('click', function() {
+      // Get the cocktail name from data attribute
+      const tabbedBox = document.querySelector('.tabbed-text-box');
+      let cocktailName = tabbedBox.dataset.cocktailName || "cocktail";
+      // Sanitize filename: remove special chars (optional)
+      cocktailName = cocktailName.replace(/[^\w\d-_]+/g, "_");
+
+      // Determine which tab is active ("cic" or "ontology")
+      const activeTab = document.querySelector('.tab-button.active');
+      let fileType = "cic";
+      if (activeTab && activeTab.textContent.toLowerCase().includes('ontology')) {
+        fileType = "ontology";
+      }
+      const fileName = `${cocktailName}_${fileType}.txt`;
+
+      // Get content of currently active tab's text box
+      const activeContent = document.querySelector('.tab-content.active .output-box');
+      let text = "";
+      if (activeContent) {
+        text = activeContent.textContent || activeContent.innerText || "";
+      }
+      
+      // Trigger download
+      const blob = new Blob([text], {type: "text/plain"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function() {
+        URL.revokeObjectURL(a.href);
+        a.remove();
+      }, 0);
+    });
   </script>
 </body>
 </html>

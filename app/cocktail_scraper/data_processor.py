@@ -312,7 +312,11 @@ def process_repo_data(repo_data):
 
         ingredient_types, ingredient_count = get_types(content["ingredients"])
         content["ingredient_types"] = list(ingredient_types)
-        content["ingredient_count"] = ingredient_count
+        
+        if "languages" in repo:
+            content["ingredient_count"] = ingredient_count + len(content["languages"])
+        else:
+            content["ingredient_count"] = ingredient_count
         
         processed_data.append(content)
 

@@ -263,11 +263,14 @@ def generate_cic(repo_data):
         "name": repo_data["name"],
         "ingredient_count": repo_data["ingredient_count"],
         "ontology": ontology,
-        "cic": cic,
-        "graph": "TBD"
+        "cic": cic
     }
 
     return result
+
+def generate_graph_dot(name, cic):
+    dot = generate_graph(name, cic, True, True, False)
+    return dot
 
 # Makes ontologies from data loaded from a JSON file, generates the corresponding graph and saves them localy (for debug, requires empty "generated_ontologies" folder)
 def test_ontology():
