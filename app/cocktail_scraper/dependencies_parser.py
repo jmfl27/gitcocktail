@@ -24,25 +24,39 @@ def type_indentifier(ingredient,info=None):
 
 # Parses a "requirements.txt" file for dependencies
 def py_requirements(req_contents):
+    # Regex for flags
     flag_regex = r"^-\w\s+.+"
+    # Regex for flag -r
     flag_req_regex = r"^-r\s+(.+)"
+    # Regex for valid dependency
     dependency_regex = r"^[a-zA-Z0-9_\-\.]+"
+    # Regex for URLs
+    url_regex = r"^(https?:\/\/|ftp:\/\/|www\.).+"
+    # Regex for file paths (absolute, relative, or containing dirs/extensions)
+    filepath_regex = r"^\.?\/?[\w\-]+(\/[\w\-.]+)+(\.[\w\d]+)?$|^\.?\/?[\w\-]+(\.[\w\d]+)"
 
     dependecies = []
     requires = []
 
     # Go through each line from the file
     for line in req_contents.splitlines():
+        stripped = line.strip()
+        # Skip empty lines and comments
+        if not stripped or stripped == "#":
+            continue
         # If flag "-r", then save the name of the additional requirements file
-        req_match = re.match(flag_req_regex,line.strip())
+        req_match = re.match(flag_req_regex, stripped)
         if req_match:
             requires.append(req_match.group(1))
         else:
+             # If line is a URL or a file path, skip it
+            if re.match(url_regex, stripped) or re.match(filepath_regex, stripped):
+                continue
             # If it's another flag or comentary, ignore
-            flag_match = re.match(flag_regex,line.strip())
+            flag_match = re.match(flag_regex, stripped)
             if not flag_match and line.strip()[0] != '#':
                 # If dependency, save it's name
-                dependency_match = re.match(dependency_regex,line.strip())
+                dependency_match = re.match(dependency_regex, stripped)
                 if dependency_match:
                     dependecies.append(type_indentifier(dependency_match.group()))
                 else:
@@ -215,10 +229,20 @@ def js_packageJson(package_content):
                 print("Package.json - Not a git-less peerDependency match: " + dependency)
                 input("Press enter to continue")
 
-    # For bundledDependencies (usually just package names in an array of strings, not objects)
-    if 'bundledDependencies' in json_dict:
+    # For bundledDependencies/bundleDependencies (usually just package names in an array of strings or a single bool, not objects)
+    if 'bundledDependencies' in json_dict and type(json_dict['bundledDependencies']) != bool:
         dependencies['bundledDependencies'] = []
         for dependency in json_dict['bundledDependencies']:
+            match = re.match(gitless_regex, dependency.strip())
+            if match:
+                dependencies['bundledDependencies'].append(type_indentifier(match.group()))
+            else:
+                print("Package.json - Not a git-less bundledDependency match: " + dependency)
+                input("Press enter to continue")
+
+    if 'bundleDependencies' in json_dict and type(json_dict['bundleDependencies']) != bool:
+        dependencies['bundledDependencies'] = []
+        for dependency in json_dict['bundleDependencies']:
             match = re.match(gitless_regex, dependency.strip())
             if match:
                 dependencies['bundledDependencies'].append(type_indentifier(match.group()))
@@ -245,7 +269,7 @@ def js_packageJson(package_content):
             if op_system[0] != '!':
                 dependencies['os'].append({"name" : op_system, "type" : 'Resource'})
     
-    #printdependencies)
+    #print(dependencies)
     #print(len(json_dict['devDependencies'].keys()))
     #print(len(dependencies['devDependencies']))
 
@@ -329,7 +353,7 @@ def ruby_gemfile(gemfile_content):
         #print(group)
         dependencies[group] = []
         for gem in gems:
-            #print(f"  {gem.name} {gem.requirement}")
+            #print(f"  {gem.name} {gem.requirement} {gem.autorequire}")
             dependencies[group].append(type_indentifier(gem.name))
         
         # Eliminate empty groups from the parsed file
@@ -361,7 +385,7 @@ def php_composerJson(composer_content):
 
 # Parses a "go.mod" file for dependencies
 def go_goMod(go_mod_content):
-   # Create a temporary directory to act as the module root
+    # Create a temporary directory to act as the module root
     with tempfile.TemporaryDirectory() as tempdir:
         go_mod_path = os.path.join(tempdir, "go.mod")
         # Write go.mod content to the temp directory
