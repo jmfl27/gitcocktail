@@ -11,7 +11,7 @@ CONCEPTS   : "conceitos"  | "concepts"
 INDIVIDUALS: "individuos" | "individuals"
 RELATIONS  : "relacoes"   | "relationships"
 TRIPLES    : "triplos"    | "triples"
-NAME: /[\-@a-zA-Z0-9_][\.@a-zA-Z0-9_\/\-+#\(\)]*/
+NAME: /[\.\-@a-zA-Z0-9_][\.@a-zA-Z0-9_\/\-+#\(\)]*/
 
 start: ONTOLOGY NAME concepts_decl individuals_decl? relations_decl? triples_decl "."
 

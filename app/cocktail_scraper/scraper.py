@@ -5,6 +5,14 @@ import base64
 import pprint
 import re
 
+# Loads the data.json file as a dictionary
+def load_data_json():
+    with open('cocktail_scraper/data.json') as json_data:
+        data = json.load(json_data)
+        json_data.close()
+
+    return data
+
 # Fetches the repo data through the GitHub API
 def get_repo_data(repo_url, token=None):
     # Extract owner and repo name from URL
@@ -238,16 +246,9 @@ def split_into_batches(data, batch_size=100):
     return batches
 
 # Finds the path of all of the targeted dependency files present in the specified repo
-def find_dependency_files(file_path_data):
+def find_dependency_files(file_path_data,targets):
     target_files = {}
 
-    # Types of dependency files to target
-    targets = [
-        "requirements.txt", "pyproject.toml", "package.json", "yarn.lock",
-        "package-lock.json", "pom.xml", "Gemfile", "Gemfile.lock",
-        "composer.json", "composer.lock", "go.mod", "go.sum",
-        "Cargo.toml", "Cargo.lock", ".csproj", "packages.config"
-    ]
 
     # Sort them by list
     for file in file_path_data:
@@ -512,6 +513,9 @@ def save_file(repo_data):
 
 # Scrap data from the repository
 def scrap_data(repo_url,token,debug=None):
+    # Load data.json
+    data_json = load_data_json()
+    
     repo_data = get_repo_data(repo_url,token)
 
     # If repo exists, is available and data was able to be fetched
@@ -532,7 +536,9 @@ def scrap_data(repo_url,token,debug=None):
         if file_path_data:
             #print(f"File path data:\n{file_path_data}")
             repo_data["file_path_data"] = file_path_data
-            target_files = find_dependency_files(file_path_data)
+            # Load types of dependency files to target
+            targets = data_json["dependency_file_targets"]
+            target_files = find_dependency_files(file_path_data,targets)
             dependency_files_data = get_dependencies(repo_url, token, target_files, repo_data.get('default_branch'))
             if dependency_files_data:
                 #pprint.pprint(dependency_files_data)

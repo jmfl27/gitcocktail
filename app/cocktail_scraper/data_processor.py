@@ -2,6 +2,7 @@ import json
 import re
 import pprint
 from . import dependencies_parser
+from .scraper import load_data_json
 
 # Auxiliary function to help rebuid file hierarchy
 def build_hierarchy(entries):
@@ -98,6 +99,7 @@ def load_repos(file_path,is_file):
         data = file_path
 
     for repo in data:
+        print(repo["name"])
         content = {}
         content["name"] = repo["name"]
         content["description"] = repo["description"]
@@ -181,6 +183,9 @@ def eliminate_duplicates(obj):
 
 # Parses a repo's dependency files for ingredients
 def parse_dependencies(repo):
+    # Load data.json
+    data_json = load_data_json()
+
     content = {}
 
     if "pyproject.toml" in repo["dependency_file_data"]:
@@ -279,12 +284,53 @@ def parse_dependencies(repo):
                         content.setdefault(key, []).extend(dependencies[key])  
 
     if ".csproj" in repo["dependency_file_data"]:   
-        # {'packageReference':[], 'reference':[]}      
-        for file in repo["dependency_file_data"][".csproj"]:
-            dependencies = dependencies_parser.dotNet_proj(file["text"])
+        # Load dotNet framework tfm (target framework moniker)
+        frameworks_json = data_json["dotNet_framework_tfm"]
+        
+        # Build lookup for faster checking
+        framework_tfm = {}
+        for group, tfms in frameworks_json.items():
+            for tfm in tfms:
+                framework_tfm[tfm] = group
+
+        # {'packageReference':[], 'reference':[], 'frameworks':[]}      
+        for file in repo["dependency_file_data"][".csproj"]:      
+            dependencies = dependencies_parser.dotNet_proj(file["text"],framework_tfm)
             for key in dependencies:
                 content.setdefault('necessary', []).extend(dependencies[key])  
 
+    if ".vbproj" in repo["dependency_file_data"]:
+        # Load dotNet framework tfm (target framework moniker)
+        frameworks_json = data_json["dotNet_framework_tfm"]
+        
+        # Build lookup for faster checking
+        framework_tfm = {}
+        for group, tfms in frameworks_json.items():
+            for tfm in tfms:
+                framework_tfm[tfm] = group
+
+        # {'packageReference':[], 'reference':[], 'frameworks':[]}      
+        for file in repo["dependency_file_data"][".vbproj"]:        
+            dependencies = dependencies_parser.dotNet_proj(file["text"],framework_tfm)
+            for key in dependencies:
+                content.setdefault('necessary', []).extend(dependencies[key])
+
+    if ".fsproj" in repo["dependency_file_data"]:
+        # Load dotNet framework tfm (target framework moniker)
+        frameworks_json = data_json["dotNet_framework_tfm"]
+        
+        # Build lookup for faster checking
+        framework_tfm = {}
+        for group, tfms in frameworks_json.items():
+            for tfm in tfms:
+                framework_tfm[tfm] = group
+
+        # {'packageReference':[], 'reference':[], 'frameworks':[]}      
+        for file in repo["dependency_file_data"][".fsproj"]:        
+            dependencies = dependencies_parser.dotNet_proj(file["text"],framework_tfm)
+            for key in dependencies:
+                content.setdefault('necessary', []).extend(dependencies[key]) 
+    
     if "packages.config" in repo["dependency_file_data"]:
         # []     
         for file in repo["dependency_file_data"]["packages.config"]:

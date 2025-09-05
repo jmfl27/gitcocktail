@@ -14,13 +14,40 @@ def normalize(s):
 
 # Tries to identify an ingredient's type, defaults to 'Library'
 def type_indentifier(ingredient,info=None):
-    result = {"name" : ingredient}
-    #TODO: Implementar database de ingredientes
-    identity = "Library"
 
-    result["type"] = identity
+    # Try to identify type based on the given info
+    if info:
+        if info["type"]:
+            if info["type"] == 'dotNet_framework':
+                results = []
+                frameworks_found = set()
+                # For each tfm found
+                for tfm in ingredient:
+                    # Find the associated framework
+                    for key in info["data"]:
+                        # If tfm matches, identify the Framework
+                        if key in tfm:
+                            framework = info["data"][key]
+                            # Prevent repeated frameworks
+                            if framework not in frameworks_found:
+                                frameworks_found.add(framework)
+                                # Case where framworks share tfm
+                                if '/' in framework:
+                                    for splited in framework.split('/'):
+                                        results.append({"name": splited, 'type': "Framework"})
+                                else:
+                                    results.append({"name": framework, 'type': "Framework"})
+                            break
+                
+                return results
 
-    return result
+
+    else:
+        if type(ingredient) != list:
+            # Defualt to Library type
+            result = {"name" : ingredient, 'type': "Library"}
+
+            return result
 
 # Parses a "requirements.txt" file for dependencies
 def py_requirements(req_contents):
@@ -385,7 +412,7 @@ def php_composerJson(composer_content):
 
 # Parses a "go.mod" file for dependencies
 def go_goMod(go_mod_content):
-    # Create a temporary directory to act as the module root
+   # Create a temporary directory to act as the module root
     with tempfile.TemporaryDirectory() as tempdir:
         go_mod_path = os.path.join(tempdir, "go.mod")
         # Write go.mod content to the temp directory
@@ -511,7 +538,9 @@ def rust_cargoToml(toml_content,recursive):
     return dependencies
 
 # Parses a ".cproj",".vbproj" or ".fsproj" file (.Net) for dependencies
-def dotNet_proj(xml_content):
+def dotNet_proj(xml_content,framework_tfm):
+    tfms = set()
+
     root = ET.fromstring(xml_content)
     dependencies = {}
     
@@ -522,10 +551,14 @@ def dotNet_proj(xml_content):
         # Package name is in 'Include' atribute
         package = dependency.attrib
         if 'Include' in package:
-            # Eliminate dynamic versions from the dependency name '$({version_sub}).'
-            name = re.sub(r'\$\([^)]*\)\.?', '', package['Include'])
-            if name != '':
-                dependencies['packageReference'].append(type_indentifier(name))
+            print("in PackageReference: " + package['Include'])
+            if package['Include'] != None:
+                # Separate package name from other atributes in cases where they are specified in the same string
+                raw_name = package['Include'].split(',')[0]
+                # Eliminate dynamic versions from the dependency name '$({version_sub}).'
+                name = re.sub(r'\$\([^)]*\)\.?', '', raw_name)
+                if name != '':
+                    dependencies['packageReference'].append(type_indentifier(name))
     
     # Find all of the 'Reference' elements
     if root.findall('.//Reference'):
@@ -535,11 +568,40 @@ def dotNet_proj(xml_content):
         package = dependency.attrib
         if 'Include' in package:
             #print(package['Include'])
-            # Eliminate dynamic versions from the dependency name '$({version_sub}).'
-            name = re.sub(r'\$\([^)]*\)\.?', '', package['Include'])
-            if name != '':
-                dependencies['reference'].append(type_indentifier(name))
-    
+            print("in Reference: " + package['Include'])
+            if package['Include'] != None:
+                # Separate package name from other atributes in cases where they are specified in the same string
+                raw_name = package['Include'].split(',')[0]
+                # Eliminate dynamic versions from the dependency name '$({version_sub}).'
+                name = re.sub(r'\$\([^)]*\)\.?', '', raw_name)
+                if name != '':
+                    dependencies['reference'].append(type_indentifier(name))
+
+    # Find all of the 'TargetFramework' elements
+    if root.findall('.//TargetFramework'):
+        dependencies.setdefault('frameworks', [])
+        for target in root.findall('.//TargetFramework'):
+            if target.text != None:
+                tfm = target.text
+                tfms.add(tfm)
+
+    # Find all of the 'TargetFrameworks' elements
+    if root.findall('.//TargetFrameworks'):
+        dependencies.setdefault('frameworks', [])
+        for target in root.findall('.//TargetFrameworks'):
+            #print("in TargetFrameworks: " + target.text)
+            if target.text != None:
+                tfm_text = target.text.split(';')
+                for tfm in tfm_text:
+                    tfms.add(tfm)
+
+    # Identify all of the frameworks from the tfms gathered
+    if tfms:
+        dotNet_frameworks = type_indentifier(tfms,{'type':'dotNet_framework','data':framework_tfm})
+        dependencies['frameworks'] = dotNet_frameworks
+
+    #print(tfms)
+    #print(dotNet_frameworks)
     #pprint(dependencies)
 
     return dependencies
@@ -583,6 +645,10 @@ def load_file(file_path):
 #rust_cargoToml(load_file("dependency_examples/rust/Cargo.toml"),False)
 #rust_cargoToml(load_file("dependency_examples/rust/Cargo2.toml"),False)
 #rust_cargoToml(load_file("dependency_examples/rust/Cargo3.toml"),False)
+#dotNet_proj(load_file("dependency_examples/dotnet/ex1.csproj"))
+#dotNet_proj(load_file("dependency_examples/dotnet/ex2.csproj"))
 #dotNet_proj(load_file("dependency_examples/dotnet/ex3.csproj"))
 #dotNet_proj(load_file("dependency_examples/dotnet/ex4.csproj"))
+#dotNet_proj(load_file("dependency_examples/dotnet/ex5.fsproj"))
+#dotNet_proj(load_file("dependency_examples/dotnet/ex6.vbproj"))
 #dotNet_packagesConfig(load_file("dependency_examples/dotnet/packages.config"))
