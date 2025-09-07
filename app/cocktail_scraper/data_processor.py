@@ -104,8 +104,9 @@ def load_repos(file_path,is_file):
         content["name"] = repo["name"]
         content["description"] = repo["description"]
         content["languages"] = []
-        for lang in repo["languages"]:
-            content["languages"].append(lang.replace(" ","_"))
+        if "languages" in repo:
+            for lang in repo["languages"]:
+                content["languages"].append(lang.replace(" ","_"))
         content["readme"] = repo["readme"]
         """
         content["files"] = {"pathlessFiles":[]}
@@ -332,10 +333,20 @@ def parse_dependencies(repo):
                 content.setdefault('necessary', []).extend(dependencies[key]) 
     
     if "packages.config" in repo["dependency_file_data"]:
-        # []     
+        # Load dotNet framework tfm (target framework moniker)
+        frameworks_json = data_json["dotNet_framework_tfm"]
+        
+        # Build lookup for faster checking
+        framework_tfm = {}
+        for group, tfms in frameworks_json.items():
+            for tfm in tfms:
+                framework_tfm[tfm] = group
+
+        # {'package':[], 'frameworks':[]}     
         for file in repo["dependency_file_data"]["packages.config"]:
-            dependencies = dependencies_parser.dotNet_packagesConfig(file["text"])
-            content.setdefault('necessary', []).extend(dependencies)
+            dependencies = dependencies_parser.dotNet_packagesConfig(file["text"],framework_tfm)
+            for key in dependencies:
+                content.setdefault('necessary', []).extend(dependencies[key]) 
     
     return eliminate_duplicates(content)
 

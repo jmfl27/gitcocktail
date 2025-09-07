@@ -102,7 +102,7 @@ def translate_data(repo_data,is_cic):
                 Framework,
                 Tool
     """
-    # Trim down the ontology for the CIC: only instantiate all ingedient type concepts that are present in tuples
+    # Trim down the ontology for the CIC: only instantiate all ingredient type concepts that are present in tuples
     else:
         for type in ingredient_types:
             ontology += ",\n" + big_tab + type

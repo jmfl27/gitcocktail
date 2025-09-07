@@ -555,8 +555,8 @@ def dotNet_proj(xml_content,framework_tfm):
             if package['Include'] != None:
                 # Separate package name from other atributes in cases where they are specified in the same string
                 raw_name = package['Include'].split(',')[0]
-                # Eliminate dynamic versions from the dependency name '$({version_sub}).'
-                name = re.sub(r'\$\([^)]*\)\.?', '', raw_name)
+                # Eliminate dynamic versions from the dependency name '$({version_sub}).' and groups '@({item_group_name})'
+                name = re.sub(r'[\$@]\([^)]*\)\.?', '', raw_name)
                 if name != '':
                     dependencies['packageReference'].append(type_indentifier(name))
     
@@ -572,8 +572,8 @@ def dotNet_proj(xml_content,framework_tfm):
             if package['Include'] != None:
                 # Separate package name from other atributes in cases where they are specified in the same string
                 raw_name = package['Include'].split(',')[0]
-                # Eliminate dynamic versions from the dependency name '$({version_sub}).'
-                name = re.sub(r'\$\([^)]*\)\.?', '', raw_name)
+                # Eliminate dynamic versions from the dependency name '$({version_sub}).' and groups '@({item_group_name})'
+                name = re.sub(r'[\$@]\([^)]*\)\.?', '', raw_name)
                 if name != '':
                     dependencies['reference'].append(type_indentifier(name))
 
@@ -606,20 +606,34 @@ def dotNet_proj(xml_content,framework_tfm):
 
     return dependencies
 
-def dotNet_packagesConfig(xml_content):
+def dotNet_packagesConfig(xml_content,framework_tfm):
     root = ET.fromstring(xml_content)
-    dependencies = []
+    dependencies = {}
+    tfms = set()
     
     # Find all of the 'package' elements
+    if root.findall('.//package'):
+        dependencies['package'] = []
     for dependency in root.findall('.//package'):
         # Package name is in 'id' atribute
         package = dependency.attrib
         if 'id' in package:
             #print(package['id'])
-            # Eliminate dynamic versions from the dependency name '$({version_sub}).'
-            name = re.sub(r'\$\([^)]*\)\.?', '', package['id'])
+            # Separate package name from other atributes in cases where they are specified in the same string
+            raw_name = package['id'].split(',')[0]
+            # Eliminate dynamic versions from the dependency name '$({version_sub}).' and groups '@({item_group_name})'
+            name = re.sub(r'[\$@]\([^)]*\)\.?', '', raw_name)
             if name != '':
-                dependencies.append(type_indentifier(name))
+                 dependencies['package'].append(type_indentifier(name))
+        
+        # Gather tfms to use to identify frameworks targeted 
+        if 'targetFramework' in package and package['targetFramework'] != None:
+            tfms.add(package['targetFramework'])
+        
+        # Identify all of the frameworks from the tfms gathered
+        if tfms:
+            dotNet_frameworks = type_indentifier(tfms,{'type':'dotNet_framework','data':framework_tfm})
+            dependencies['frameworks'] = dotNet_frameworks
     
     #pprint(dependencies)
 

@@ -110,17 +110,17 @@ def generate_repo_cic(repo_url, github_token):
         return repo_data
     else:
         # GitHub API fetching success; proceed with CIC generation
-        print("SCRAPER:\n")
-        print(repo_data)
+        #print("SCRAPER:\n")
+        #print(repo_data)
 
         processed_data = process_data([repo_data])
-        print("PROCESSOR:\n")
-        print(processed_data)
+        #print("PROCESSOR:\n")
+        #print(processed_data)
 
         if len(processed_data) == 1:
             cic = generate_cic(processed_data[0])
-            print("TRANSLATOR:\n")
-            print(cic)
+            #print("TRANSLATOR:\n")
+            #print(cic)
         else:
             # Multiple repos error treatement (just to be safe)
             print("Error: Fetched multiple repos somehow")
