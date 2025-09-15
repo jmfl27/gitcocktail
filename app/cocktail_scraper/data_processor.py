@@ -342,7 +342,7 @@ def parse_dependencies(repo):
             for tfm in tfms:
                 framework_tfm[tfm] = group
 
-        # {'package':[], 'frameworks':[]}     
+        # {'package':[], 'devDependencies':[], 'frameworks':[]}     
         for file in repo["dependency_file_data"]["packages.config"]:
             dependencies = dependencies_parser.dotNet_packagesConfig(file["text"],framework_tfm)
             for key in dependencies:
@@ -370,7 +370,8 @@ def process_repo_data(repo_data):
         ingredient_types, ingredient_count = get_types(content["ingredients"])
         content["ingredient_types"] = list(ingredient_types)
         
-        if "languages" in repo:
+        if "languages" in repo and content["languages"] != []:
+            content["ingredient_types"].append('Language')
             content["ingredient_count"] = ingredient_count + len(content["languages"])
         else:
             content["ingredient_count"] = ingredient_count

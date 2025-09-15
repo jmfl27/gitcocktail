@@ -29,8 +29,8 @@ def restore_tuples(repo):
     return repo
 """
 
-# Creates tuples from a list of ingredients found in dependency files
-def dependency_tuples(list,already_used,app_name,cocktail_name):
+# Creates triples from a list of ingredients found in dependency files
+def dependency_triples(list,already_used,app_name,cocktail_name):
     ontology = ""
 
     for ingredient in list:
@@ -81,8 +81,7 @@ def translate_data(repo_data,is_cic):
     ontology = """
     Ontology OntoCoq
 
-        concepts {
-    """
+        concepts {"""
     
     # Trim down the ontology for the CIC: no Sys, Ing, Ckt or Dev concepts (individuals take their place)
     if not is_cic:
@@ -94,10 +93,10 @@ def translate_data(repo_data,is_cic):
 """
     ontology += """
                 Resource,
-                Task,
-                Language"""
+                Task"""
     if not is_cic:
         ontology += """,
+                Language,
                 Library,
                 Framework,
                 Tool
@@ -209,8 +208,8 @@ def translate_data(repo_data,is_cic):
     # Task triples
     if "ingredients" in repo_data and "tasks" in repo_data["ingredients"]:
         for task in repo_data["ingredients"]["tasks"]:
-            ontology += big_tab + task + " = isa => Task;\n"
-            ontology += big_tab + task + " = pof => " + dev_name + ";\n"
+            ontology += big_tab + task['name'] + " = isa => Task;\n"
+            ontology += big_tab + task['name'] + " = pof => " + dev_name + ";\n"
 
     already_used.clear()
 
@@ -223,20 +222,20 @@ def translate_data(repo_data,is_cic):
                 # is_used_for => Task
 
     if "ingredients" in repo_data:
-        # Dependency ingredient tuples
+        # Dependency ingredient triples
         if "dependencies" in repo_data["ingredients"]:
             for dep_type, dep_value in repo_data["ingredients"]["dependencies"].items():
                 if dep_type != "target":
                     if dep_type in nested_cases:
                         # dep_value is a dict of sub-dependencies
                         for sub in dep_value:
-                            result = dependency_tuples(dep_value[sub],already_used,app_name,cocktail_name)
+                            result = dependency_triples(dep_value[sub],already_used,app_name,cocktail_name)
                             # Update ontology with result
                             ontology += result[0]
                             # Update set of used names
                             already_used = result[1]
                     else:
-                        result = dependency_tuples(dep_value,already_used,app_name,cocktail_name)
+                        result = dependency_triples(dep_value,already_used,app_name,cocktail_name)
                         ontology += result[0]
                         already_used = result[1]
                 else:
@@ -244,7 +243,7 @@ def translate_data(repo_data,is_cic):
                     for target in dep_value:
                             # sub can be 'necessary', 'devDependency', etc...
                             for sub in dep_value[target]:
-                                result = dependency_tuples(dep_value[target][sub],already_used,app_name,cocktail_name)
+                                result = dependency_triples(dep_value[target][sub],already_used,app_name,cocktail_name)
                                 ontology += result[0]
                                 already_used = result[1]
 
@@ -268,6 +267,7 @@ def generate_cic(repo_data):
 
     return result
 
+# Generate a given CIC's graph
 def generate_graph_dot(name, cic):
     dot = generate_graph(name, cic, True, True, False)
     return dot

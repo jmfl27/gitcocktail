@@ -13,11 +13,12 @@ def normalize(s):
     return s.strip()
 
 # Tries to identify an ingredient's type, defaults to 'Library'
-def type_indentifier(ingredient,info=None):
+def type_identifier(ingredient,info=None):
 
     # Try to identify type based on the given info
     if info:
         if info["type"]:
+            # 1st Case - Identify a .NET framework from the tfm
             if info["type"] == 'dotNet_framework':
                 results = []
                 frameworks_found = set()
@@ -85,7 +86,7 @@ def py_requirements(req_contents):
                 # If dependency, save it's name
                 dependency_match = re.match(dependency_regex, stripped)
                 if dependency_match:
-                    dependecies.append(type_indentifier(dependency_match.group()))
+                    dependecies.append(type_identifier(dependency_match.group()))
                 else:
                     print("Python requirements.txt - Not a dependency match: " + line)
                     input("Press enter to continue")
@@ -169,7 +170,7 @@ def py_pyproject(toml_content):
                     temp.append({"name" : dependency, "type" : classifiers[normalize(dependency)]})
                 else:
                     # If not, try to identify
-                    temp.append(type_indentifier(dependency))
+                    temp.append(type_identifier(dependency))
             dependencies['necessary'] = temp
 
         if "optional" in dependencies.keys():
@@ -183,7 +184,7 @@ def py_pyproject(toml_content):
                             temp.append({"name" : dependency, "type" : classifiers[normalize(dependency)]})
                         else:
                             # If not, try to identify
-                            temp.append(type_indentifier(dependency))
+                            temp.append(type_identifier(dependency))
                     dependencies['optional'][group] = temp
             else:
                 # Get ingredient type from classifiers if it exists
@@ -193,7 +194,7 @@ def py_pyproject(toml_content):
                         temp.append({"name" : dependency, "type" : classifiers[normalize(dependency)]})
                     else:
                         # If not, try to identify
-                        temp.append(type_indentifier(dependency))
+                        temp.append(type_identifier(dependency))
                 dependencies['optional'] = temp
     
     tools = []
@@ -229,7 +230,7 @@ def js_packageJson(package_content):
         for dependency in json_dict['dependencies']:
             match = re.match(gitless_regex,dependency.strip())
             if match:
-                dependencies['necessary'].append(type_indentifier(match.group()))
+                dependencies['necessary'].append(type_identifier(match.group()))
             else: 
                 print("Package.json - Not a git-less dependency match: " + dependency)
                 input("Press enter to continue")
@@ -240,7 +241,7 @@ def js_packageJson(package_content):
         for dependency in json_dict['devDependencies']:
             match = re.match(gitless_regex,dependency.strip())
             if match:
-                dependencies['devDependencies'].append(type_indentifier(match.group()))
+                dependencies['devDependencies'].append(type_identifier(match.group()))
             else: 
                 print("Package.json - Not a git-less devDependency match: " + dependency)
                 input("Press enter to continue")        
@@ -251,7 +252,7 @@ def js_packageJson(package_content):
         for dependency in json_dict['peerDependencies']:
             match = re.match(gitless_regex,dependency.strip())
             if match:
-                dependencies['peerDependencies'].append(type_indentifier(match.group()))
+                dependencies['peerDependencies'].append(type_identifier(match.group()))
             else: 
                 print("Package.json - Not a git-less peerDependency match: " + dependency)
                 input("Press enter to continue")
@@ -262,7 +263,7 @@ def js_packageJson(package_content):
         for dependency in json_dict['bundledDependencies']:
             match = re.match(gitless_regex, dependency.strip())
             if match:
-                dependencies['bundledDependencies'].append(type_indentifier(match.group()))
+                dependencies['bundledDependencies'].append(type_identifier(match.group()))
             else:
                 print("Package.json - Not a git-less bundledDependency match: " + dependency)
                 input("Press enter to continue")
@@ -272,7 +273,7 @@ def js_packageJson(package_content):
         for dependency in json_dict['bundleDependencies']:
             match = re.match(gitless_regex, dependency.strip())
             if match:
-                dependencies['bundledDependencies'].append(type_indentifier(match.group()))
+                dependencies['bundledDependencies'].append(type_identifier(match.group()))
             else:
                 print("Package.json - Not a git-less bundledDependency match: " + dependency)
                 input("Press enter to continue")
@@ -283,7 +284,7 @@ def js_packageJson(package_content):
         for dependency, version in json_dict['optionalDependencies'].items():
             match = re.match(gitless_regex, dependency.strip())
             if match:
-                dependencies['optional'].append(type_indentifier(match.group()))
+                dependencies['optional'].append(type_identifier(match.group()))
             else:
                 print("Package.json - Not a git-less optionalDependency match: " + dependency)
                 input("Press enter to continue")
@@ -317,7 +318,7 @@ def js_yarnLock(yarn_content):
         if match:
             if match.group(1) not in names:
                 #print(match.group(1))
-                dependencies.append(type_indentifier(match.group(1)))
+                dependencies.append(type_identifier(match.group(1)))
                 names.add(match.group(1))
         else:
             print("yarn.lock - Not a package match: " + package)
@@ -352,7 +353,7 @@ def java_pomXML(xml_content):
         # Prevent repeated dependency entries
         if artifact_id not in names:
             names.add(artifact_id)
-            dependencies.append(type_indentifier(artifact_id))
+            dependencies.append(type_identifier(artifact_id))
 
     #printdependencies)    
     return dependencies
@@ -381,7 +382,7 @@ def ruby_gemfile(gemfile_content):
         dependencies[group] = []
         for gem in gems:
             #print(f"  {gem.name} {gem.requirement} {gem.autorequire}")
-            dependencies[group].append(type_indentifier(gem.name))
+            dependencies[group].append(type_identifier(gem.name))
         
         # Eliminate empty groups from the parsed file
         if dependencies[group] == []:
@@ -399,12 +400,12 @@ def php_composerJson(composer_content):
     if "require" in json_dict:
         dependencies["necessary"] = []
         for package in json_dict["require"]:
-            dependencies["necessary"].append(type_indentifier(package))
+            dependencies["necessary"].append(type_identifier(package))
     
     if "require-dev" in json_dict:
         dependencies["devDependencies"] = []
         for package in json_dict["require-dev"]:
-            dependencies["devDependencies"].append(type_indentifier(package))
+            dependencies["devDependencies"].append(type_identifier(package))
 
     #pprint(dependencies)        
 
@@ -450,9 +451,9 @@ def go_goMod(go_mod_content):
             if 'Indirect' in dependency and dependency['Indirect']:
                 if 'indirect' not in dependencies:
                     dependencies['indirect'] = []
-                dependencies['indirect'].append(type_indentifier(name))
+                dependencies['indirect'].append(type_identifier(name))
             else:
-                dependencies['necessary'].append(type_indentifier(name))
+                dependencies['necessary'].append(type_identifier(name))
         else:
             print("go.mod - Not a match: " + dependency["Path"])
             input("Press enter to continue")
@@ -477,7 +478,7 @@ def go_goSum(go_sum_content):
             # If name is not a repeat, add to list
             if name not in names:
                 names.add(name)
-                dependencies.append(type_indentifier(name))
+                dependencies.append(type_identifier(name))
         else:
             print("go.sum - Not a match: " + line)
             input("Press enter to continue")
@@ -502,25 +503,25 @@ def rust_cargoToml(toml_content,recursive):
         if 'dependencies'in toml_dict['workspace']:
             dependencies['workspaceDependencies'] = []
             for dependency in toml_dict['workspace']['dependencies']:
-                dependencies['workspaceDependencies'].append(type_indentifier(dependency))
+                dependencies['workspaceDependencies'].append(type_identifier(dependency))
     
     # Add dependencies present in the cargo
     if 'dependencies' in toml_dict.keys():
         dependencies['necessary'] = []
         for dependency in toml_dict['dependencies']:
-            dependencies['necessary'].append(type_indentifier(dependency))
+            dependencies['necessary'].append(type_identifier(dependency))
     
     # Add dev dependencies present in the cargo
     if 'dev-dependencies' in toml_dict.keys():
         dependencies['devDependencies'] = []
         for dependency in toml_dict['dev-dependencies']:
-            dependencies['devDependencies'].append(type_indentifier(dependency))
+            dependencies['devDependencies'].append(type_identifier(dependency))
     
     # Add build dependencies present in the cargo
     if 'build-dependencies' in toml_dict.keys():
         dependencies['buildDependencies'] = []
         for dependency in toml_dict['build-dependencies']:
-            dependencies['buildDependencies'].append(type_indentifier(dependency))
+            dependencies['buildDependencies'].append(type_identifier(dependency))
 
     # Cargos may have dependencies limited by certain targets, like OS
     if 'target' in toml_dict.keys():
@@ -558,7 +559,7 @@ def dotNet_proj(xml_content,framework_tfm):
                 # Eliminate dynamic versions from the dependency name '$({version_sub}).' and groups '@({item_group_name})'
                 name = re.sub(r'[\$@]\([^)]*\)\.?', '', raw_name)
                 if name != '':
-                    dependencies['packageReference'].append(type_indentifier(name))
+                    dependencies['packageReference'].append(type_identifier(name))
     
     # Find all of the 'Reference' elements
     if root.findall('.//Reference'):
@@ -575,7 +576,7 @@ def dotNet_proj(xml_content,framework_tfm):
                 # Eliminate dynamic versions from the dependency name '$({version_sub}).' and groups '@({item_group_name})'
                 name = re.sub(r'[\$@]\([^)]*\)\.?', '', raw_name)
                 if name != '':
-                    dependencies['reference'].append(type_indentifier(name))
+                    dependencies['reference'].append(type_identifier(name))
 
     # Find all of the 'TargetFramework' elements
     if root.findall('.//TargetFramework'):
@@ -597,7 +598,7 @@ def dotNet_proj(xml_content,framework_tfm):
 
     # Identify all of the frameworks from the tfms gathered
     if tfms:
-        dotNet_frameworks = type_indentifier(tfms,{'type':'dotNet_framework','data':framework_tfm})
+        dotNet_frameworks = type_identifier(tfms,{'type':'dotNet_framework','data':framework_tfm})
         dependencies['frameworks'] = dotNet_frameworks
 
     #print(tfms)
@@ -624,16 +625,21 @@ def dotNet_packagesConfig(xml_content,framework_tfm):
             # Eliminate dynamic versions from the dependency name '$({version_sub}).' and groups '@({item_group_name})'
             name = re.sub(r'[\$@]\([^)]*\)\.?', '', raw_name)
             if name != '':
-                 dependencies['package'].append(type_indentifier(name))
+                # If developmenDependency is present, separate from regular packages
+                if 'developmentDependency' in package and package['developmentDependency'] == 'true':
+                    dependencies.setdefault('devDependencies', [])
+                    dependencies['devDependencies'].append(type_identifier(name))
+                else:
+                    dependencies['package'].append(type_identifier(name))
         
         # Gather tfms to use to identify frameworks targeted 
         if 'targetFramework' in package and package['targetFramework'] != None:
             tfms.add(package['targetFramework'])
         
-        # Identify all of the frameworks from the tfms gathered
-        if tfms:
-            dotNet_frameworks = type_indentifier(tfms,{'type':'dotNet_framework','data':framework_tfm})
-            dependencies['frameworks'] = dotNet_frameworks
+    # Identify all of the frameworks from the tfms gathered
+    if tfms:
+        dotNet_frameworks = type_identifier(tfms,{'type':'dotNet_framework','data':framework_tfm})
+        dependencies['frameworks'] = dotNet_frameworks
     
     #pprint(dependencies)
 
