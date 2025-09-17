@@ -1,5 +1,5 @@
 from flask import Flask, render_template, flash, jsonify, request, redirect, session, url_for, abort
-import requests
+import re
 import os
 import secrets
 from dotenv import load_dotenv
@@ -47,9 +47,16 @@ def generate():
     session['github_token'] = github_token
     
     # Validate inputs
+    git_url_regex = r'^(https:\/\/github\.com\/[\w.-]+\/[\w.-]+(\.git)?|git@github\.com:[\w.-]+\/[\w.-]+(\.git)?)$'
     if not repo_url or not github_token:
         flash('Missing one or more required fields, please insert them.', 'error')
         return redirect(url_for('homepage'))  # Redirect to homepage
+    elif re.match(git_url_regex, repo_url) is None:
+        flash('The URL you provided is not in a valid format for a GitHub repository URL.\n'
+                'Please make sure that you inserted the URL correctly and that it belongs to an ' \
+                'available repository.', 'error')
+        return redirect(url_for('homepage'))  # Redirect to homepage
+        
     
     # Process data
     try:
@@ -110,16 +117,17 @@ def generate_repo_cic(repo_url, github_token):
         return repo_data
     else:
         # GitHub API fetching success; proceed with CIC generation
-        #print("SCRAPER:\n")
+        print("SCRAPER:\n")
         #print(repo_data)
 
+        print("PROCESSOR:\n")
         processed_data = process_data([repo_data])
-        #print("PROCESSOR:\n")
+        
         #print(processed_data)
 
         if len(processed_data) == 1:
+            print("TRANSLATOR:\n")
             cic = generate_cic(processed_data[0])
-            #print("TRANSLATOR:\n")
             #print(cic)
         else:
             # Multiple repos error treatement (just to be safe)
