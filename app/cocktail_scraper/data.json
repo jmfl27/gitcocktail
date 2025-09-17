@@ -6,6 +6,9 @@
         "Cargo.toml", "Cargo.lock", ".csproj", ".vbproj", ".fsproj",
         "packages.config"
     ],
+    "dotNet_languages" : [
+        "C#","F#","Visual_Basic_.NET"
+    ],
     "dotNet_framework_tfm": {
         ".NET_5+/.NET_Core": [
             "netcoreapp1.0",

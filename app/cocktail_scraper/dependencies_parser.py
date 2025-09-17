@@ -13,7 +13,7 @@ def normalize(s):
     return s.strip()
 
 # Tries to identify an ingredient's type, defaults to 'Library'
-def type_identifier(ingredient,info=None):
+def type_identifier(ingredient,info=None,associated_languages=None):
 
     # Try to identify type based on the given info
     if info:
@@ -28,16 +28,18 @@ def type_identifier(ingredient,info=None):
                     for key in info["data"]:
                         # If tfm matches, identify the Framework
                         if key in tfm:
-                            framework = info["data"][key]
-                            # Prevent repeated frameworks
-                            if framework not in frameworks_found:
-                                frameworks_found.add(framework)
-                                # Case where framworks share tfm
-                                if '/' in framework:
-                                    for splited in framework.split('/'):
-                                        results.append({"name": splited, 'type': "Framework"})
-                                else:
-                                    results.append({"name": framework, 'type': "Framework"})
+                            framework_entry = info["data"][key]
+                             # Prevent repeated frameworks
+                            if framework_entry not in frameworks_found:
+                                frameworks_found.add(framework_entry)
+                                # '/' -> Case where framworks share tfm
+                                frameworks = framework_entry.split('/') if '/' in framework_entry else [framework_entry]
+                                for framework in frameworks:
+                                    entry = {"name": framework, 'type': "Framework"}
+                                    # If an associated languages list was passed as an argument
+                                    if associated_languages:
+                                        entry["associated_languages"] = associated_languages
+                                    results.append(entry)
                             break
                 
                 return results
@@ -47,6 +49,10 @@ def type_identifier(ingredient,info=None):
         if type(ingredient) != list:
             # Defualt to Library type
             result = {"name" : ingredient, 'type': "Library"}
+            
+            # If an associated languages list was passed as an argument
+            if associated_languages:
+                result["associated_languages"] = associated_languages
 
             return result
 
@@ -86,7 +92,7 @@ def py_requirements(req_contents):
                 # If dependency, save it's name
                 dependency_match = re.match(dependency_regex, stripped)
                 if dependency_match:
-                    dependecies.append(type_identifier(dependency_match.group()))
+                    dependecies.append(type_identifier(dependency_match.group(),associated_languages=['Python']))
                 else:
                     print("Python requirements.txt - Not a dependency match: " + line)
                     input("Press enter to continue")
@@ -167,10 +173,10 @@ def py_pyproject(toml_content):
             for dependency in dependencies['necessary']:
                 if normalize(dependency) in classifiers:
                     #TODO: Implementar database de ingredientes
-                    temp.append({"name" : dependency, "type" : classifiers[normalize(dependency)]})
+                    temp.append({"name" : dependency, "type" : classifiers[normalize(dependency)], 'associated_languages':['Python']})
                 else:
                     # If not, try to identify
-                    temp.append(type_identifier(dependency))
+                    temp.append(type_identifier(dependency,associated_languages=['Python']))
             dependencies['necessary'] = temp
 
         if "optional" in dependencies.keys():
@@ -181,26 +187,26 @@ def py_pyproject(toml_content):
                     for dependency in dependencies['optional'][group]:
                         if normalize(dependency) in classifiers:
                             #TODO: Implementar database de ingredientes
-                            temp.append({"name" : dependency, "type" : classifiers[normalize(dependency)]})
+                            temp.append({"name" : dependency, "type" : classifiers[normalize(dependency)],'associated_languages':['Python']})
                         else:
                             # If not, try to identify
-                            temp.append(type_identifier(dependency))
+                            temp.append(type_identifier(dependency,associated_languages=['Python']))
                     dependencies['optional'][group] = temp
             else:
                 # Get ingredient type from classifiers if it exists
                 for dependency in dependencies['optional']:
                     if normalize(dependency) in classifiers:
                         #TODO: Implementar database de ingredientes
-                        temp.append({"name" : dependency, "type" : classifiers[normalize(dependency)]})
+                        temp.append({"name" : dependency, "type" : classifiers[normalize(dependency)],'associated_languages':['Python']})
                     else:
                         # If not, try to identify
-                        temp.append(type_identifier(dependency))
+                        temp.append(type_identifier(dependency,associated_languages=['Python']))
                 dependencies['optional'] = temp
     
     tools = []
     if 'tool' in toml_dict:
         for tool in toml_dict['tool']: 
-            tools.append({"name" : tool, "type": 'Tool'})
+            tools.append({"name" : tool, "type": 'Tool','associated_languages':['Python']})
 
 
     #pprint(dependencies)
@@ -230,7 +236,7 @@ def js_packageJson(package_content):
         for dependency in json_dict['dependencies']:
             match = re.match(gitless_regex,dependency.strip())
             if match:
-                dependencies['necessary'].append(type_identifier(match.group()))
+                dependencies['necessary'].append(type_identifier(match.group(),associated_languages=['JavaScript']))
             else: 
                 print("Package.json - Not a git-less dependency match: " + dependency)
                 input("Press enter to continue")
@@ -241,7 +247,7 @@ def js_packageJson(package_content):
         for dependency in json_dict['devDependencies']:
             match = re.match(gitless_regex,dependency.strip())
             if match:
-                dependencies['devDependencies'].append(type_identifier(match.group()))
+                dependencies['devDependencies'].append(type_identifier(match.group(),associated_languages=['JavaScript']))
             else: 
                 print("Package.json - Not a git-less devDependency match: " + dependency)
                 input("Press enter to continue")        
@@ -252,7 +258,7 @@ def js_packageJson(package_content):
         for dependency in json_dict['peerDependencies']:
             match = re.match(gitless_regex,dependency.strip())
             if match:
-                dependencies['peerDependencies'].append(type_identifier(match.group()))
+                dependencies['peerDependencies'].append(type_identifier(match.group(),associated_languages=['JavaScript']))
             else: 
                 print("Package.json - Not a git-less peerDependency match: " + dependency)
                 input("Press enter to continue")
@@ -263,7 +269,7 @@ def js_packageJson(package_content):
         for dependency in json_dict['bundledDependencies']:
             match = re.match(gitless_regex, dependency.strip())
             if match:
-                dependencies['bundledDependencies'].append(type_identifier(match.group()))
+                dependencies['bundledDependencies'].append(type_identifier(match.group(),associated_languages=['JavaScript']))
             else:
                 print("Package.json - Not a git-less bundledDependency match: " + dependency)
                 input("Press enter to continue")
@@ -273,7 +279,7 @@ def js_packageJson(package_content):
         for dependency in json_dict['bundleDependencies']:
             match = re.match(gitless_regex, dependency.strip())
             if match:
-                dependencies['bundledDependencies'].append(type_identifier(match.group()))
+                dependencies['bundledDependencies'].append(type_identifier(match.group(),associated_languages=['JavaScript']))
             else:
                 print("Package.json - Not a git-less bundledDependency match: " + dependency)
                 input("Press enter to continue")
@@ -284,7 +290,7 @@ def js_packageJson(package_content):
         for dependency, version in json_dict['optionalDependencies'].items():
             match = re.match(gitless_regex, dependency.strip())
             if match:
-                dependencies['optional'].append(type_identifier(match.group()))
+                dependencies['optional'].append(type_identifier(match.group(),associated_languages=['JavaScript']))
             else:
                 print("Package.json - Not a git-less optionalDependency match: " + dependency)
                 input("Press enter to continue")
@@ -318,7 +324,7 @@ def js_yarnLock(yarn_content):
         if match:
             if match.group(1) not in names:
                 #print(match.group(1))
-                dependencies.append(type_identifier(match.group(1)))
+                dependencies.append(type_identifier(match.group(1),associated_languages=['JavaScript']))
                 names.add(match.group(1))
         else:
             print("yarn.lock - Not a package match: " + package)
@@ -353,7 +359,7 @@ def java_pomXML(xml_content):
         # Prevent repeated dependency entries
         if artifact_id not in names:
             names.add(artifact_id)
-            dependencies.append(type_identifier(artifact_id))
+            dependencies.append(type_identifier(artifact_id,associated_languages=['Java']))
 
     #printdependencies)    
     return dependencies
@@ -382,7 +388,7 @@ def ruby_gemfile(gemfile_content):
         dependencies[group] = []
         for gem in gems:
             #print(f"  {gem.name} {gem.requirement} {gem.autorequire}")
-            dependencies[group].append(type_identifier(gem.name))
+            dependencies[group].append(type_identifier(gem.name,associated_languages=['Ruby']))
         
         # Eliminate empty groups from the parsed file
         if dependencies[group] == []:
@@ -400,12 +406,12 @@ def php_composerJson(composer_content):
     if "require" in json_dict:
         dependencies["necessary"] = []
         for package in json_dict["require"]:
-            dependencies["necessary"].append(type_identifier(package))
+            dependencies["necessary"].append(type_identifier(package,associated_languages=['PHP']))
     
     if "require-dev" in json_dict:
         dependencies["devDependencies"] = []
         for package in json_dict["require-dev"]:
-            dependencies["devDependencies"].append(type_identifier(package))
+            dependencies["devDependencies"].append(type_identifier(package,associated_languages=['PHP']))
 
     #pprint(dependencies)        
 
@@ -451,9 +457,9 @@ def go_goMod(go_mod_content):
             if 'Indirect' in dependency and dependency['Indirect']:
                 if 'indirect' not in dependencies:
                     dependencies['indirect'] = []
-                dependencies['indirect'].append(type_identifier(name))
+                dependencies['indirect'].append(type_identifier(name,associated_languages=['Go']))
             else:
-                dependencies['necessary'].append(type_identifier(name))
+                dependencies['necessary'].append(type_identifier(name,associated_languages=['Go']))
         else:
             print("go.mod - Not a match: " + dependency["Path"])
             input("Press enter to continue")
@@ -478,7 +484,7 @@ def go_goSum(go_sum_content):
             # If name is not a repeat, add to list
             if name not in names:
                 names.add(name)
-                dependencies.append(type_identifier(name))
+                dependencies.append(type_identifier(name,associated_languages=['Go']))
         else:
             print("go.sum - Not a match: " + line)
             input("Press enter to continue")
@@ -503,25 +509,25 @@ def rust_cargoToml(toml_content,recursive):
         if 'dependencies'in toml_dict['workspace']:
             dependencies['workspaceDependencies'] = []
             for dependency in toml_dict['workspace']['dependencies']:
-                dependencies['workspaceDependencies'].append(type_identifier(dependency))
+                dependencies['workspaceDependencies'].append(type_identifier(dependency,associated_languages=['Rust']))
     
     # Add dependencies present in the cargo
     if 'dependencies' in toml_dict.keys():
         dependencies['necessary'] = []
         for dependency in toml_dict['dependencies']:
-            dependencies['necessary'].append(type_identifier(dependency))
+            dependencies['necessary'].append(type_identifier(dependency,associated_languages=['Rust']))
     
     # Add dev dependencies present in the cargo
     if 'dev-dependencies' in toml_dict.keys():
         dependencies['devDependencies'] = []
         for dependency in toml_dict['dev-dependencies']:
-            dependencies['devDependencies'].append(type_identifier(dependency))
+            dependencies['devDependencies'].append(type_identifier(dependency,associated_languages=['Rust']))
     
     # Add build dependencies present in the cargo
     if 'build-dependencies' in toml_dict.keys():
         dependencies['buildDependencies'] = []
         for dependency in toml_dict['build-dependencies']:
-            dependencies['buildDependencies'].append(type_identifier(dependency))
+            dependencies['buildDependencies'].append(type_identifier(dependency,associated_languages=['Rust']))
 
     # Cargos may have dependencies limited by certain targets, like OS
     if 'target' in toml_dict.keys():
@@ -539,7 +545,7 @@ def rust_cargoToml(toml_content,recursive):
     return dependencies
 
 # Parses a ".cproj",".vbproj" or ".fsproj" file (.Net) for dependencies
-def dotNet_proj(xml_content,framework_tfm):
+def dotNet_proj(xml_content,framework_tfm,languages):
     tfms = set()
 
     root = ET.fromstring(xml_content)
@@ -552,14 +558,14 @@ def dotNet_proj(xml_content,framework_tfm):
         # Package name is in 'Include' atribute
         package = dependency.attrib
         if 'Include' in package:
-            print("in PackageReference: " + package['Include'])
+            #print("in PackageReference: " + package['Include'])
             if package['Include'] != None:
                 # Separate package name from other atributes in cases where they are specified in the same string
                 raw_name = package['Include'].split(',')[0]
                 # Eliminate dynamic versions from the dependency name '$({version_sub}).' and groups '@({item_group_name})'
                 name = re.sub(r'[\$@]\([^)]*\)\.?', '', raw_name)
                 if name != '':
-                    dependencies['packageReference'].append(type_identifier(name))
+                    dependencies['packageReference'].append(type_identifier(name,associated_languages=languages))
     
     # Find all of the 'Reference' elements
     if root.findall('.//Reference'):
@@ -569,14 +575,14 @@ def dotNet_proj(xml_content,framework_tfm):
         package = dependency.attrib
         if 'Include' in package:
             #print(package['Include'])
-            print("in Reference: " + package['Include'])
+            #print("in Reference: " + package['Include'])
             if package['Include'] != None:
                 # Separate package name from other atributes in cases where they are specified in the same string
                 raw_name = package['Include'].split(',')[0]
                 # Eliminate dynamic versions from the dependency name '$({version_sub}).' and groups '@({item_group_name})'
                 name = re.sub(r'[\$@]\([^)]*\)\.?', '', raw_name)
                 if name != '':
-                    dependencies['reference'].append(type_identifier(name))
+                    dependencies['reference'].append(type_identifier(name,associated_languages=languages))
 
     # Find all of the 'TargetFramework' elements
     if root.findall('.//TargetFramework'):
@@ -598,7 +604,7 @@ def dotNet_proj(xml_content,framework_tfm):
 
     # Identify all of the frameworks from the tfms gathered
     if tfms:
-        dotNet_frameworks = type_identifier(tfms,{'type':'dotNet_framework','data':framework_tfm})
+        dotNet_frameworks = type_identifier(tfms,{'type':'dotNet_framework','data':framework_tfm},associated_languages=languages)
         dependencies['frameworks'] = dotNet_frameworks
 
     #print(tfms)
@@ -607,7 +613,7 @@ def dotNet_proj(xml_content,framework_tfm):
 
     return dependencies
 
-def dotNet_packagesConfig(xml_content,framework_tfm):
+def dotNet_packagesConfig(xml_content,framework_tfm,languages):
     root = ET.fromstring(xml_content)
     dependencies = {}
     tfms = set()
@@ -628,9 +634,9 @@ def dotNet_packagesConfig(xml_content,framework_tfm):
                 # If developmenDependency is present, separate from regular packages
                 if 'developmentDependency' in package and package['developmentDependency'] == 'true':
                     dependencies.setdefault('devDependencies', [])
-                    dependencies['devDependencies'].append(type_identifier(name))
+                    dependencies['devDependencies'].append(type_identifier(name,associated_languages=languages))
                 else:
-                    dependencies['package'].append(type_identifier(name))
+                    dependencies['package'].append(type_identifier(name,associated_languages=languages))
         
         # Gather tfms to use to identify frameworks targeted 
         if 'targetFramework' in package and package['targetFramework'] != None:
@@ -638,7 +644,7 @@ def dotNet_packagesConfig(xml_content,framework_tfm):
         
     # Identify all of the frameworks from the tfms gathered
     if tfms:
-        dotNet_frameworks = type_identifier(tfms,{'type':'dotNet_framework','data':framework_tfm})
+        dotNet_frameworks = type_identifier(tfms,{'type':'dotNet_framework','data':framework_tfm},associated_languages=languages)
         dependencies['frameworks'] = dotNet_frameworks
     
     #pprint(dependencies)
@@ -649,26 +655,3 @@ def dotNet_packagesConfig(xml_content,framework_tfm):
 def load_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         return file.read()
-
-
-# ------------------------------- FOR TESTING ONLY -------------------------------
-
-#py_pyproject(load_file("dependency_examples/py/requests.toml"))
-#js_packageJson(load_file("dependency_examples/js/package.json"))
-#js_yarnLock(load_file("dependency_examples/js/yarn.lock"))
-#py_requirements(load_file("dependency_examples/py/requirements.txt"))
-#java_pomXML(load_file("dependency_examples/java/pom4.xml"))
-#ruby_gemfile(load_file("dependency_examples/ruby/Gemfile"))
-#php_composerJson(load_file("dependency_examples/php/composer2.json"))
-#go_goMod(load_file("dependency_examples/go/go.mod"))
-#go_goSum(load_file("dependency_examples/go/go.sum"))
-#rust_cargoToml(load_file("dependency_examples/rust/Cargo.toml"),False)
-#rust_cargoToml(load_file("dependency_examples/rust/Cargo2.toml"),False)
-#rust_cargoToml(load_file("dependency_examples/rust/Cargo3.toml"),False)
-#dotNet_proj(load_file("dependency_examples/dotnet/ex1.csproj"))
-#dotNet_proj(load_file("dependency_examples/dotnet/ex2.csproj"))
-#dotNet_proj(load_file("dependency_examples/dotnet/ex3.csproj"))
-#dotNet_proj(load_file("dependency_examples/dotnet/ex4.csproj"))
-#dotNet_proj(load_file("dependency_examples/dotnet/ex5.fsproj"))
-#dotNet_proj(load_file("dependency_examples/dotnet/ex6.vbproj"))
-#dotNet_packagesConfig(load_file("dependency_examples/dotnet/packages.config"))

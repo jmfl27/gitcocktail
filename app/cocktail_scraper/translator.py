@@ -89,8 +89,8 @@ def translate_data(repo_data,is_cic):
                 System,
                 Ingredient,
                 Cocktail,
-                Development,
-"""
+                Development,"""
+                
     ontology += """
                 Resource,
                 Task"""
@@ -310,4 +310,5 @@ def test_ontology():
     with open(filename, 'w') as f:
         json.dump(ontology_data, f, indent=4)  
 
-#test_ontology()
+#if __name__ == "__main__":
+#    test_ontology()
