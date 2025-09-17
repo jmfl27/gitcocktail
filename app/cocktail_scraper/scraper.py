@@ -60,7 +60,21 @@ def get_file_content(repo_url, path, token=None):
 
     if response.status_code == 200:
         data = response.json()
-        content = base64.b64decode(data['content']).decode('utf-8')
+        # If file size is over 1MB
+        if data['content'] == "":
+            raw_headers = headers.copy()
+            raw_headers["Accept"] = "application/vnd.github.v3.raw"
+            # Re-request with raw Accept header
+            raw_response = requests.get(api_url, headers=raw_headers)
+            if raw_response.status_code == 200:
+                content = raw_response.text
+            else:
+                print(
+                    f"Error: Unable to fetch large file content (Status code {raw_response.status_code}: {raw_response.text})"
+                )
+                return None
+        else:
+            content = base64.b64decode(data['content']).decode('utf-8')
         return content
     else:
         print(f"Error: Unable to fetch file content (Status code {response.status_code}: {response.text})")
@@ -574,5 +588,5 @@ def test_scraper():
             break
 
 # ------------------------------- FOR TESTING ONLY -------------------------------
-
-#test_scraper()
+#if __name__ == "__main__":
+#    test_scraper()
