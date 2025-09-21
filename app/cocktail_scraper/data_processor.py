@@ -426,7 +426,9 @@ def process_repo_data(repo_data):
             content["languages"] = repo["languages"]
         
         if "submodules" in repo:
-            content["submodules"] = repo["submodules"]
+            content["ingredients"]["submodules"] = []
+            for submodule in repo["submodules"]:
+                content["ingredients"]["submodules"].append({"name": submodule, 'type': "Library"})
 
         ingredient_types, ingredient_count = get_types(content["ingredients"])
         content["ingredient_types"] = list(ingredient_types)

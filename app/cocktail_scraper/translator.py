@@ -54,7 +54,7 @@ def dependency_triples(list,already_used,app_name,cocktail_name):
                         for lang in ingredient["associated_languages"]:
                             ontology += big_tab + ingredient["name"] + " = encloses => " + lang + ";\n"       
                     # Tool
-                    else:
+                    elif ingredient["type"] == "Tool":
                         for lang in ingredient["associated_languages"]:
                             ontology += big_tab + ingredient["name"] + " = supports => " + lang + ";\n"
                 
@@ -124,31 +124,40 @@ def translate_data(repo_data,is_cic):
                 ontology +=  ",\n" + big_tab + lang
 
     # Instantiate all ingredients   
-    if "ingredients" in repo_data and "dependencies" in repo_data["ingredients"]:
-        for dep_type, dep_value in repo_data["ingredients"]["dependencies"].items():
-            if dep_type != "target":
-                if dep_type in nested_cases:
-                    # dep_value is a dict of sub-dependencies
-                    for sub in dep_value:
-                        for ingredient in dep_value[sub]:
+    if "ingredients" in repo_data:
+        # Instantiate dependency ingredients
+        if "dependencies" in repo_data["ingredients"]:
+            for dep_type, dep_value in repo_data["ingredients"]["dependencies"].items():
+                if dep_type != "target":
+                    if dep_type in nested_cases:
+                        # dep_value is a dict of sub-dependencies
+                        for sub in dep_value:
+                            for ingredient in dep_value[sub]:
+                                if ingredient["name"] not in already_used:
+                                    ontology += ",\n" + big_tab + ingredient["name"]
+                                    already_used.add(ingredient["name"])
+                    else:
+                        # dep_value is a list of ingredients
+                        for ingredient in dep_value:
                             if ingredient["name"] not in already_used:
                                 ontology += ",\n" + big_tab + ingredient["name"]
                                 already_used.add(ingredient["name"])
                 else:
-                    # dep_value is a list of ingredients
-                    for ingredient in dep_value:
-                        if ingredient["name"] not in already_used:
-                            ontology += ",\n" + big_tab + ingredient["name"]
-                            already_used.add(ingredient["name"])
-            else:
-                # 'target' case for cargo.toml are more nested than usual, thus special treatment
-                for target in dep_value:
-                        # sub can be 'necessary', 'devDependency', etc...
-                        for sub in dep_value[target]:
-                            for ingredient in dep_value[target][sub]:
-                                if ingredient["name"] not in already_used:
-                                    ontology += ",\n" + big_tab + ingredient["name"]
-                                    already_used.add(ingredient["name"])
+                    # 'target' case for cargo.toml are more nested than usual, thus special treatment
+                    for target in dep_value:
+                            # sub can be 'necessary', 'devDependency', etc...
+                            for sub in dep_value[target]:
+                                for ingredient in dep_value[target][sub]:
+                                    if ingredient["name"] not in already_used:
+                                        ontology += ",\n" + big_tab + ingredient["name"]
+                                        already_used.add(ingredient["name"])
+        
+        # Instantiate submodule ingredients
+        if "submodules" in repo_data["ingredients"]:
+            print("aqui")
+            for submodule in repo_data["ingredients"]["submodules"]:
+                ontology += ",\n" + big_tab + submodule["name"]
+                already_used.add(submodule["name"])
 
 
     ontology += """
@@ -246,6 +255,12 @@ def translate_data(repo_data,is_cic):
                                 result = dependency_triples(dep_value[target][sub],already_used,app_name,cocktail_name)
                                 ontology += result[0]
                                 already_used = result[1]
+
+        # Submodule ingredient triples
+        if "submodules" in repo_data["ingredients"]:
+            result = dependency_triples(repo_data["ingredients"]["submodules"],already_used,app_name,cocktail_name)
+            ontology += result[0]
+            already_used = result[1]
 
     ontology += """
     }
