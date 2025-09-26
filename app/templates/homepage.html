@@ -36,7 +36,16 @@
       <label for="url"><i class="fa-brands fa-github" style="margin-right: 5px;"></i>Enter a valid GitHub repository URL to scrape (public or one you have access to):</label>
       <input type="text" id="url" name="repo_url" placeholder="e.g., https://github.com/author/repository"/>
 
-      <label for="token"><i class="fa-solid fa-user " style="margin-right: 5px;"></i>Enter a valid GitHub personal access token:</label>
+      <label for="token" class="label-icon-container">
+        <i class="fa-solid fa-user" style="margin-right: 5px;"></i>
+        Enter a valid GitHub personal access token:
+        <span class="tooltip-icon">
+          <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens" target="_blank" tabindex="-1">
+            <i class="fa-solid fa-circle-question" style="color: black;" aria-label="More info"></i>
+          </a>
+          <span class="tooltip-text">Requires a GitHub account; click for information on how to generate a token (a classic one is recomended)</span>
+        </span>
+    </label>
       <div class="password-wrapper">
         <input type="password" autocomplete="current-password" id="token" name="github_token"/>
         <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">

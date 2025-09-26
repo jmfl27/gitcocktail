@@ -372,3 +372,37 @@ nav a:hover {
   height: 80px;
   font-size: large;
 }
+
+.label-icon-container {
+  display: flex;
+  align-items: center;
+}
+
+.tooltip-icon {
+  position: relative;
+  display: inline-block;
+  margin-left: 8px; /* Space between label and icon */
+}
+
+.tooltip-icon .tooltip-text {
+  visibility: hidden;
+  width: 160px;
+  background: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 5px;
+  padding: 6px 8px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  font-size: 13px;
+  transition: opacity 0.3s;
+}
+
+.tooltip-icon:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}

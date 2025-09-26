@@ -98,7 +98,7 @@ def results():
 
     if not results:
         # Redirect if no results
-        return redirect(url_for('index'))
+        return redirect(url_for('homepage'))
     
     try:
         return render_template('results.html', 
