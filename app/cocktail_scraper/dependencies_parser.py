@@ -1,4 +1,4 @@
-import re, json, toml, tempfile, subprocess, os
+import re, json, tomllib, tempfile, subprocess, os
 import xml.etree.ElementTree as ET
 import pyarn.lockfile
 from gemfileparser2 import GemfileParser
@@ -106,7 +106,7 @@ def py_requirements(req_contents):
 # Parses a "pyproject.toml" file for dependencies
 def py_pyproject(toml_content):
     #print(toml_content)
-    toml_dict = toml.loads(toml_content)
+    toml_dict = tomllib.loads(toml_content)
     #pprint(toml_dict)
     dependency_regex = r"^[a-zA-Z0-9_\-\.]+"
     dependencies = {}
@@ -124,14 +124,16 @@ def py_pyproject(toml_content):
                 input("Press enter to continue")
 
     # Fetch "optional-dependencies" block
-    if 'project' in toml_dict and toml_dict['project']['optional-dependencies']:
+    if 'project' in toml_dict and 'optional-dependencies' in toml_dict['project']:
         # If "optional-dependencies" has multiple entries
         if isinstance(toml_dict['project']['optional-dependencies'], dict):
             optional_dict = True
             dependencies["optional"]={}
+            print('aqui')
             for group in toml_dict['project']['optional-dependencies']:
                 dependencies['optional'][group] = []
                 for dependency in toml_dict['project']['optional-dependencies'][group]:
+                    print('acola')
                     match = re.match(dependency_regex,dependency.strip())
                     if match: 
                         dependencies['optional'][group].append(match.group())
@@ -496,7 +498,7 @@ def go_goSum(go_sum_content):
 # Parses a "cargo.toml" file for dependencies
 def rust_cargoToml(toml_content,recursive):
     if not recursive:
-        toml_dict = toml.loads(toml_content)
+        toml_dict = tomllib.loads(toml_content)
         #pprint(toml_dict)
         #print("||\n\/")
     else:
