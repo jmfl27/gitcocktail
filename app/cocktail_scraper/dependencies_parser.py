@@ -1,7 +1,7 @@
 import re, json, tomllib, tempfile, subprocess, os
 import xml.etree.ElementTree as ET
 import pyarn.lockfile
-from gemfileparser2 import GemfileParser
+from .modified_gemfileparser import GemfileParser
 from pprint import pprint
 
 # Used to normalize names to be compared
