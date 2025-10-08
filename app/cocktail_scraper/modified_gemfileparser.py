@@ -71,7 +71,7 @@ class GemfileParser(object):
     gemfile_regexes["path"] = re.compile(r"path:[ ]?(?P<path>[a-zA-Z:\/\.-]+)")
     gemfile_regexes["branch"] = re.compile(r"branch:[ ]?(?P<branch>[a-zA-Z:\/\.-]+)")
     gemfile_regexes["autorequire"] = re.compile(r"require:[ ]?(?P<autorequire>[a-zA-Z:\/\.-]+)")
-    gemfile_regexes["group"] = re.compile(r"group:[ ]?(?P<group>[a-zA-Z:\/\.-]+)")
+    gemfile_regexes["group"] = re.compile(r"groups?:[ ]?(?P<group>[a-zA-Z:\/\.-]+)")
     #gemfile_regexes["name"] = re.compile(r"(?P<name>[a-zA-Z]+[\.0-9a-zA-Z _-]*)")
     gemfile_regexes["name"] = re.compile(r"(?P<name>['\"][a-zA-Z]+[\.0-9a-zA-Z _-]*['\"])")
     gemfile_regexes["requirement"] = re.compile(
