@@ -71,6 +71,7 @@ def convert_to_output_format(hierarchy):
     
     return output
 
+"""
 # Fetches all of the distinct ingredient types and counts the number of ingredients present
 def get_types(obj, types=None, count=None):
     if types is None:
@@ -87,6 +88,23 @@ def get_types(obj, types=None, count=None):
         for item in obj:
             get_types(item, types, count)
     return types, count[0]
+"""
+# Fetches all of the distinct ingredient types and counts the number of ingredients present
+def get_types(obj, types=None, count=None):
+    if types is None:
+        types = set()
+    if count is None:
+        count = set()
+    if isinstance(obj, dict):
+        if "type" in obj:
+            types.add(obj["type"])
+            count.add(obj["name"])
+        for v in obj.values():
+            get_types(v, types, count)
+    elif isinstance(obj, list):
+        for item in obj:
+            get_types(item, types, count)
+    return types, count
 
 # Loads the repo data from a file or from a dictionary
 def load_repos(file_path,is_file):
@@ -435,9 +453,9 @@ def process_repo_data(repo_data):
         
         if "languages" in repo and content["languages"] != []:
             content["ingredient_types"].append('Language')
-            content["ingredient_count"] = ingredient_count + len(content["languages"])
+            content["ingredient_count"] = len(ingredient_count) + len(content["languages"])
         else:
-            content["ingredient_count"] = ingredient_count
+            content["ingredient_count"] = len(ingredient_count)
         
         processed_data.append(content)
 

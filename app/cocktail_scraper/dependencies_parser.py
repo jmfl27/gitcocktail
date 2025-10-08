@@ -129,11 +129,9 @@ def py_pyproject(toml_content):
         if isinstance(toml_dict['project']['optional-dependencies'], dict):
             optional_dict = True
             dependencies["optional"]={}
-            print('aqui')
             for group in toml_dict['project']['optional-dependencies']:
                 dependencies['optional'][group] = []
                 for dependency in toml_dict['project']['optional-dependencies'][group]:
-                    print('acola')
                     match = re.match(dependency_regex,dependency.strip())
                     if match: 
                         dependencies['optional'][group].append(match.group())
