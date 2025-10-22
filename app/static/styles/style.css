@@ -269,6 +269,41 @@ nav a:hover {
   width: 100%;
 }
 
+.feature-container {
+  flex: 1;
+  display: flex;
+  align-items: center; /* centers content vertically if desired */
+  justify-content: flex-start; /* align text normally */
+  min-height: 120px; /* sets a base equal height; adjust as needed */
+  padding: 10px;
+  box-sizing: border-box;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.feature-container .icon {
+  font-size: 30px;
+  color: #444;
+  margin-bottom: 8px; /* space between icon and text */
+}
+
+.contact-container {
+  flex: 1;
+  align-items: center; /* centers content vertically if desired */
+  justify-content: flex-start; /* align text normally */
+  min-height: 120px; /* sets a base equal height; adjust as needed */
+  padding: 10px;
+  box-sizing: border-box;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  display: block;
+  margin-right: 0;
+}
+
 .tabbed-text-box {
   flex: 2.6;
   display: flex;

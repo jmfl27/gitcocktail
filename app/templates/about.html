@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>GitHub CIC Generator</title>
+  <title>GitCocktail</title>
   <link rel="stylesheet" href="../static/styles/style.css"/>
   <!-- Font Awesome CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
   <nav>
-    <h2>GitHub Repository Scraper and Cocktail Identity Card Generator</h2>
+    <h2>GitCocktail: GitHub Repository Scraper and Cocktail Identity Card Generator</h2>
     <button 
         onclick="window.location.href='{{ url_for('homepage') }}';"
         style="width: 140px; height: 50px; font-size: 15px;">
@@ -18,31 +18,72 @@
     </button>
   </nav>
 
-  <h3><i class="fa-solid fa-circle-info" style="margin-right: 10px;"></i>About this project</h3>
+  <h2><i class="fa-solid fa-circle-info" style="margin-right: 10px;"></i>About this project</h2>
   
-  <div class="container" style="margin-left: 0; margin-top: 10px; max-width: none;">
-    <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Est a quas illum sed quos, ipsum cum possimus laudantium, inventore distinctio tenetur. Quas perspiciatis possimus debitis quia praesentium placeat, illum doloribus!</p>
-    <!--
-    <label for="type">Select data type:</label>
-      <select id="type">
-        <option value="text">Text</option>
-        <option value="image">Image</option>
-        <option value="links">Links</option>
-      </select>
-    <div class="output-box">
-      Results will appear here...
-    </div>
-    <div class="image-preview">
-      <!-- Optional image shown after scraping -->
-      <!-- <img src="result.jpg" alt="Scraped Image"/> 
-       -->
-
-    
-    </div>
+  <div class="container" style="margin-left: 0; margin-top: 10px; max-width: none; font-size: medium;">
+    <p>GitCocktail was developed by João Loureiro as part of a project for a dissertation for the Master’s
+       in Informatics Engineering at Universidade do Minho in Braga, Portugal, under the guidance of Pedro 
+       Rangel Henriques and Alvaro Costa Neto.<br></p>
+    <p>It is integrated as part of a larger research project on Programing Cocktails (an agglomerate of computer
+       programming technologies that are used to develop a specific software application), serving as a way to
+       automate the creation of Cocktail Identity Cards (CIC). These utilize the OntoCoq ontology powered by OntoDL,
+       and serve as a way to identify a project's Ingredients, that is, the distinct components that comprise it.
+    </p>
   </div>
 
-  <footer style="margin-top: 100px; margin-left: 100px;">
-    <label >PLACEHOLDER: LOGOS NECESSARIOS E OUTRAS INFORMAÇOES</label>
+  <h2><i class="fa-solid fa-link" style="margin-right: 10px; margin-top: 20px;"></i>Related Links</h2>
+  <div class="container" style="margin-left: 0; margin-top: 0px; max-width: none; font-size: medium;">
+    <ul>
+      <li>GitCocktail source code:
+        <a href="https://github.com/jmfl27/gitcocktail">https://github.com/jmfl27/gitcocktail</a></li>
+      <li>OntoDL website: 
+        <a href="https://epl.di.uminho.pt/~gepl/GEPL_DS/OntoDL/index.html">https://epl.di.uminho.pt/~gepl/GEPL_DS/OntoDL/index.html</a></li>
+      <li>Pronto, a dynamic OntoDL ontology explorer: 
+        <a href="https://epl.di.uminho.pt/~gepl/pronto/">https://epl.di.uminho.pt/~gepl/pronto/</a></li>
+      <li>WebOntoDL, a tool for translating OntoDL into other formats: 
+        <a href="https://webontodl.epl.di.uminho.pt/">https://webontodl.epl.di.uminho.pt/</a></li>
+    </ul>
+  </div>
+
+  <h2><i class="fa-solid fa-book-open" style="margin-right: 10px; margin-top: 20px;"></i>Related Works</h2>
+  <div class="container" style="margin-left: 0; margin-top: 0px; max-width: none; font-size: medium;">
+    <ul>
+      <li>Master’s Thesis - "Collecting automatically Programming Cocktails from GitHub and other open repositories": TBA
+      </li>
+      
+      <li>SLATE2025 - "Mining GitHub Software Repositories to look for Programming Language Cocktails":
+        <a href="https://doi.org/10.4230/OASIcs.SLATE.2025.13">https://doi.org/10.4230/OASIcs.SLATE.2025.13</a></li>
+    </ul>
+  </div>
+
+  <h2><i class="fa-solid fa-address-book" style="margin-right: 10px; margin-top: 20px;"></i>Contacts</h2>
+  <div class="content-container" style="margin-top: 0px;">
+    <div class="contact-container" style="margin-left: 0; max-width: none; font-size: medium;">
+      <h3 style="margin-bottom: 5px;">João Loureiro</h4>
+      <h4 style="margin-bottom: 10px; color: #686262;">Master's Student</h5>
+      <p><i class="fa-regular fa-envelope" style="margin-right: 10px;"></i>joaoloureiro27@outlook.pt</p>
+      <p><i class="fa-brands fa-github" style="margin-right: 10px;"></i><a href="https://github.com/jmfl27">https://github.com/jmfl27</a></p>
+    </div>
+
+    <div class="contact-container" style="margin-left: 0; max-width: none; font-size: medium;">
+      <h3 style="margin-bottom: 5px;">Prof. Pedro Rangel Henriques</h4>
+      <h4 style="margin-bottom: 10px; color: #686262;">Supervisor</h5>
+      <p><i class="fa-regular fa-envelope" style="margin-right: 10px;"></i>pedrorangelhenriques@gmail.com</p>
+      <p><i class="fa-solid fa-link" style="margin-right: 6px;"></i><a href="https://epl.di.uminho.pt/~prh/">https://epl.di.uminho.pt/~prh/</a></p>
+    </div>
+
+    <div class="contact-container" style="margin-left: 0; max-width: none; font-size: medium;">
+      <h3 style="margin-bottom: 5px;">Alvaro Costa Neto</h4>
+      <h4 style="margin-bottom: 10px; color: #686262;">Co-Supervisor</h5>
+      <p><i class="fa-regular fa-envelope" style="margin-right: 10px;"></i>alvaro@ifsp.edu.br</p>
+      <p><i class="fa-solid fa-link" style="margin-right: 6px;"></i><a href="https://orcid.org/0000-0003-1861-3545">https://orcid.org/0000-0003-1861-3545</a></p>
+    </div>
+  
+  </div>
+
+  <footer style="margin-top: 50px; margin-left: 100px;">
+    <label >Created by João Loureiro for a Master's Thesis project at Universidade do Minho,
+    under the guidance of Pedro Rangel Henriques and Alvaro Costa Neto.</label>
   </footer>
 
   <script>
