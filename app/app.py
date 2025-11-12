@@ -1,21 +1,21 @@
 from flask import Flask, render_template, flash, jsonify, request, redirect, session, url_for, abort
-import re
-import os
-import secrets
 from dotenv import load_dotenv
+from waitress import serve
 from datetime import datetime
-import base64
-import cocktail_scraper.dependencies_parser
 from cocktail_scraper.scraper import scrap_data
 from cocktail_scraper.data_processor import process_data
 from cocktail_scraper.translator import generate_cic, generate_graph_dot
 from pprint import pprint
 from flask_caching import Cache
+import re
+import os
+import secrets
 
 load_dotenv() 
 
 app = Flask(__name__)
-app.secret_key = os.environ['FLASK_SECRET_KEY']
+#app.secret_key = os.getenv('FLASK_SECRET_KEY')
+app.secret_key = secrets.token_hex(32)
 
 cache = Cache(config={
     'CACHE_TYPE': 'SimpleCache',
@@ -161,5 +161,13 @@ def graph_data():
     # .source gets the DOT string for the browser to genarate the graph
     return jsonify({'dot': dot.source})
 
+# Switch to 'dev' to run in default local flask server
+mode = 'prod'
+
 if __name__ == '__main__':
-    app.run(port=8000, debug=True)
+    if mode == 'dev':
+        # Dev version launch
+        app.run(port=8000, debug=True)
+    
+    else:
+        serve(app, host='0.0.0.0', port='50100', threads=1)
