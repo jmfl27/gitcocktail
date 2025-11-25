@@ -3,5 +3,6 @@ Flask_Caching==2.3.1
 graphviz==0.20.3
 lark==1.1.9
 pyarn==0.3.0
-python-dotenv==1.1.1
+python-dotenv==1.2.1
 Requests==2.32.5
+waitress==3.0.2
